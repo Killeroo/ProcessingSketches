@@ -1,4 +1,4 @@
-# Sketches
+# Processing Sketches
 Collection of some Processing Sketches I've created over the years
 
 Mirrored from [OpenProcessing](https://www.openprocessing.org/user/78038)

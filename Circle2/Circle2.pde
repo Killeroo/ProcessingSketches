@@ -29,15 +29,15 @@ void draw(){
         //stroke(100,150,b[i]);
         rotateY((i/60.0)*a*HALF_PI+a);      
         ellipse(0,0,d[i],d[i]);
-        //rotateX(r[i]*a+a);
-        //ellipse(0,0,d[i],d[i]);
+        rotateX(r[i]*a+a);
+        ellipse(0,0,d[i],d[i]);
         //rotateZ((i/60.0)*a*HALF_PI+a);
         //ellipse(0,0,d[i],d[i]);
         popMatrix();
         
         c[i].update();
 }
-    a+=.05;
+    a+=.1;//05;
 }
 
 class Circle2

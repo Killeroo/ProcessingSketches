@@ -14,10 +14,10 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 /* Sketch properties */
-final int CIRCLES = 15;
+final int CIRCLES = 30;//15;
 final int CIRCLE_WIDTH = 10;
 final float ANGLE_INCREMENT = 0.05;
-final float ROTATION_SPEED = 60.0; // (Higher = slower)
+final float ROTATION_SPEED = 30.0; // (Higher = slower)
 final float COLOUR_CHANGE_MAX = 0.7;
 final float COLOUR_CHANGE_MIN = 0.2;
 
@@ -27,14 +27,14 @@ ColourGenerator[] colours = new ColourGenerator[CIRCLES];
 
 void setup()
 {
-    size(500, 500, P3D);
-    colorMode(HSB, 150);
+    size(1000, 1000, P3D);
+    //colorMode(HSB, 150);
     noFill();
     strokeWeight(CIRCLE_WIDTH);
     
     // Setup circles with varying sizes based on width
     for (int i = 0; i < CIRCLES; i++) {         
-      diameters[i] = CIRCLES * width / 20.0 - i * width / 20.0;
+      diameters[i] = CIRCLES * width / 50.0 - i * width / 50.0;
       colours[i] = new ColourGenerator();
     }
 }
@@ -47,17 +47,18 @@ void draw()
     // Draw the circles
     for (int i = 0; i < CIRCLES; i++){
         stroke(colours[i].R, colours[i].G, colours[i].B); // Set colour
-        
+
         // Draw each circle independantly of previous position
         pushMatrix();
-        rotateY((i/60.0) * angle * HALF_PI + angle);      
+        rotateY((i/60.0) * angle * HALF_PI + angle);  
         ellipse(0, 0, diameters[i], diameters[i]);
         popMatrix();
         
         colours[i].update();// Updated colour
     }
-    
+  
     angle += ANGLE_INCREMENT; // Increment angle
+
 }
 
 

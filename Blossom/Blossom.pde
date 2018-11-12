@@ -30,8 +30,8 @@ float posX, posY;
 void setup()
 {
   background(0);
-  fullScreen();
-  //size(1000, 1000, P2D);
+  //fullScreen();
+  size(1000, 1000, P2D);
   frameRate(60);
   noStroke();
   smooth();
@@ -147,7 +147,7 @@ class Particle
   void display()
   {
   //  colour.update();
-    fill(amplify(colour.R),amplify(colour.B),amplify(colour.G));
+    fill(amplify(colour.R),amplify(colour.B),amplify(colour.G), random(0, 255));
     
     ellipse(random(pos.x-(15), pos.x+(15)),random(pos.y-(15),pos.y+(15)), random(1,3), random(1,3));
     point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 

@@ -46,7 +46,11 @@ class Boid
   {
     // Setup initial state
     acc = new PVector(0, 0);
-    vel = PVector.random2D();
+    
+    float angle = random(TWO_PI);
+    vel = new PVector(cos(angle), sin(angle));
+    
+    //vel = PVector.random2D();
     pos = new PVector(x, y);
     
     r = 2.0;

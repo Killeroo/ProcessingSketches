@@ -1,10 +1,21 @@
+// Long term:
 // TODO: Setup constants and properties
 // TODO: Add trails & other effects (like that app)
 // TODO: Add velocity colouring
 // TODO: Add obstacles (Continous enviroment?)
 // TODO: Add predators (https://www.openprocessing.org/sketch/127609)
 
+// Short term:
+// Implement predator
+// Implement repel foce (do we need mass?)
+// Add colour to boids
+// Condense and clean up comments (add summary at start of each function
+
+
+// Overview:
 //http://www.vergenet.net/~conrad/boids/pseudocode.html
+// Nice predator example:
+//https://www.openprocessing.org/sketch/127609
 
 Flock flock;
 
@@ -25,6 +36,14 @@ void draw()
   rect(0, 0, width, height);
   //background(50, 50);
   flock.run();
+}
+
+class Predator extends Boid {
+  public Predator(float x, float y)
+  {
+    super(x, y);
+    
+  }
 }
 
 // TODO: Trim comments

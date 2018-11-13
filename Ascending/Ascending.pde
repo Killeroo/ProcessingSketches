@@ -4,8 +4,6 @@ final float GRAVITY = -0.1;
 
 ParticleSystem system = new ParticleSystem();
 
-// TODO: Culling
-
 void setup()
 {
   size(500, 500);  
@@ -19,11 +17,8 @@ void draw()
 }
 
 void mouseDragged()
-{
-    
-  ellipse(mouseX, mouseY, 3, 4);
-  
-  system.particles.add(new Particle(mouseX, mouseY));
+{ 
+  system.particles.add(new Particle(new PVector(mouseX, mouseY)));
 }
 
 class ParticleSystem
@@ -33,13 +28,21 @@ class ParticleSystem
   void update()
   {
     Iterator<Particle> i = particles.iterator();
-    
+
     while (i.hasNext()) {
       Particle p = i.next();
+      
+      // Remove any particles outside of the screen
+      if (p.pos.x > width || p.pos.x < 0) {
+        i.remove();
+      } else if (p.pos.y > height || p.pos.y < 0) {
+        i.remove();
+      }
       
       // Apply gravity
       p.applyForce(new PVector(0, GRAVITY));
       
+      // Move particle position
       p.move();
       
       if (p.isDead()) {
@@ -47,6 +50,7 @@ class ParticleSystem
       } else {
         p.display();
       }
+      
     }
   }
 }
@@ -65,9 +69,9 @@ class Particle
   float r, g, b;
   int lifespan = 255;
   
-  Particle(int x, int y)
+  Particle(PVector p)
   {
-    pos = new PVector (x, y);
+    pos = new PVector (p.x, p.y);
     acc = new PVector (random(0.1, 1.5), 0);
     r = random (100, 255);
     g = random (0, 50);
@@ -80,22 +84,7 @@ class Particle
     pos.add(vel); // Apply our speed vector
     acc.mult(0);
     
-    // Boundary check
-    if (pos.x < 0) {
-      //pos.x = 0;
-      //velocity.x *= BOUNCE;
-    } else if (pos.x > width) {
-      //pos.x = width;
-      //velocity.x *= BOUNCE;
-    }
-    if (pos.y < 0) {
-      //pos.y = 0;
-      //velocity.y *= BOUNCE;
-    } else if (pos.y > height) {
-      //pos.y = height;
-      //velocity.y *= BOUNCE;
-    }
-    
+    size += 0.01; //0.015
     lifespan--;
   }
   

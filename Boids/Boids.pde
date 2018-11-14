@@ -1,6 +1,6 @@
 // Long term:
 // TODO: Setup constants and properties
-// TODO: Add trails & other effects (like that app)
+// TODO: Add trails & other effects (like that app - data wing)
 // TODO: Add velocity colouring
 // TODO: Add obstacles (Continous enviroment?)
 // TODO: Add predators (https://www.openprocessing.org/sketch/127609)
@@ -11,23 +11,30 @@
 // Add colour to boids
 // Condense and clean up comments (add summary at start of each function
 
+// Add a system to hold the pack and the flock
+
+final int BOID_COUNT = 10;//150;
 
 // Overview:
 //http://www.vergenet.net/~conrad/boids/pseudocode.html
 // Nice predator example:
 //https://www.openprocessing.org/sketch/127609
 
-Flock flock;
+Flock flock; // Flock of boids
+Pack pack; // Pack of predators
 
 void setup()
 {
   size(1000, 1000);
   flock = new Flock();
+  pack = new Pack();
   
   // Add initial boids
-  for (int i = 0; i < 150; i++) { // TODO: Constants?
+  for (int i = 0; i < BOID_COUNT; i++) { // TODO: Constants?
     flock.addBoid(new Boid(width/2, height/2));
   }
+  
+  pack.predators.add(new Predator(width/2, height/2));
 }
 
 void draw()
@@ -35,6 +42,7 @@ void draw()
   fill(0, 10); // 50
   rect(0, 0, width, height);
   //background(50, 50);
+  pack.run();
   flock.run();
 }
 
@@ -43,6 +51,12 @@ class Predator extends Boid {
   {
     super(x, y);
     
+    r = 4.0;
+    maxspeed = 2.5;
+    maxforce = 0.03;
+    
+    
+    colour = color(200, 20, 20);
   }
 }
 
@@ -55,6 +69,8 @@ class Boid
   PVector pos;
   PVector vel;
   PVector acc;
+  
+  color colour;
   
   float r;
   // TODO: Constants?
@@ -75,6 +91,8 @@ class Boid
     r = 2.0;
     maxspeed = 2;
     maxforce = 0.03;
+    
+    colour = color(20, 200, 20);
   }
   
   // Run boid routines
@@ -90,6 +108,20 @@ class Boid
   void applyForce(PVector force)
   {
     acc.add(force);  
+  }
+  
+  void repelForce(PVector source, float range)
+  {
+    float forceScale = 2; // Make property of boid
+    
+    PVector repel = new PVector();
+    float d = PVector.sub(source, pos).mag();
+    if (d != 0 && d <= range) { // If there is a force 
+      repel = PVector.sub(pos, source);
+      repel.normalize();
+      repel.mult(map(d, range, 0, 0, forceScale * 150));
+    }
+    applyForce(repel);
   }
   
   // Accumulate acceleration based on three rules
@@ -137,7 +169,7 @@ class Boid
     //float theta = vel.heading2D() + radians(90);
     float theta = vel.heading() + radians(90);
     
-    fill(200, 100);
+    fill(colour, 100);//200, 100);
     stroke(255);
     pushMatrix();
     translate(pos.x, pos.y);
@@ -268,6 +300,9 @@ class Flock
   void run()
   {
     for (Boid b : boids) {
+      for (Predator predator : pack.predators) {
+        // b.repelForce(predator.pos, 80); NOT WORKING, REDO REPELFORCE TO WORK WITH OUR SYSTEM. 
+      }
       b.run(boids);
     }
   }
@@ -278,11 +313,20 @@ class Flock
   }
 }
 
-//class Predator extends Boid 
-//{
-  //Predator(PVector pos)
-  //{
-    //super(pos);
-    
-  //}
-//}
+// Inherit from flock?
+class Pack
+{
+  ArrayList<Predator> predators;
+  
+  Pack()
+  {
+    predators = new ArrayList<Predator>();
+  }
+  
+  void run()
+  {
+    for (Predator p : predators) {
+      p.run(flock.boids);  
+    }
+  }
+}

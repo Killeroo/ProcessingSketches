@@ -44,7 +44,7 @@ void draw()
 {
   //if (!MOTION_BLUR)
     //background(0);
-  
+  drawBackground();
   //println("Particles: " + system.particles.size());
   //println("Triangles: " + triangles.triangles.size());
   
@@ -61,6 +61,19 @@ void draw()
   system.update();
   //triangles.display();
   
+}
+
+void drawBackground()
+{
+  if (true) {
+    // Background with motion blur
+    noStroke();
+    fill(0, 10);//20);
+    rect(0, 0, width, height);
+  } else {
+    // Normal background
+    background(0);
+  }
 }
 
 float amplify(float n) {

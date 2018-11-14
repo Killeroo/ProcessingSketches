@@ -11,7 +11,8 @@ void setup()
 
 void draw()
 {
-  background(0);
+  drawBackground();
+  //background(0);
   
   system.update();
 }
@@ -19,6 +20,19 @@ void draw()
 void mouseDragged()
 { 
   system.particles.add(new Particle(new PVector(mouseX, mouseY)));
+}
+
+void drawBackground()
+{
+  if (true) {
+    // Background with motion blur
+    noStroke();
+    fill(0, 20);
+    rect(0, 0, width, height);
+  } else {
+    // Normal background
+    background(0);
+  }
 }
 
 class ParticleSystem

@@ -7,19 +7,20 @@ ParticleSystem system = new ParticleSystem();
 
 void setup()
 {
-  size(500, 500);  
+  background(0);
+  size(750, 750);  
 }
 
 void draw()
 {
   drawBackground();
-  //background(0);
   
   system.update();
 }
 
 void mouseDragged()
 { 
+  // X3 if on web
   system.particles.add(new Particle(new PVector(mouseX, mouseY)));
 }
 
@@ -57,11 +58,12 @@ class ParticleSystem
       }
       
       // Apply gravity
-      p.applyForce(new PVector(0, GRAVITY));
+      p.applyForce(PVector.random2D());
       
       // Move particle position
       p.move();
       
+      // Remove dead particles
       if (p.isDead()) {
         i.remove();  
       } else {
@@ -113,7 +115,8 @@ class Particle
   
   public void display()
   {
-    fill(r, g, b, lifespan);
+    print(this.vel + "\n");
+    fill(constrain(abs(this.vel.y) * 100, 0, 255), constrain(abs(this.vel.x) * 100, 0, 255), b, lifespan);
     
     ellipse(pos.x, pos.y, size * 4, size * 4);
   }

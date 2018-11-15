@@ -25,7 +25,7 @@ Pack pack; // Pack of predators
 
 void setup()
 {
-  size(1000, 1000);
+  size(500, 500);//1000, 1000);
   flock = new Flock();
   pack = new Pack();
   
@@ -39,9 +39,9 @@ void setup()
 
 void draw()
 {
-  fill(0, 10); // 50
-  rect(0, 0, width, height);
-  //background(50, 50);
+  //fill(0, 10); // 50
+  //rect(0, 0, width, height);
+  background(50, 50);
   pack.run();
   flock.run();
 }
@@ -82,6 +82,7 @@ class Boid
     // Setup initial state
     acc = new PVector(0, 0);
     
+    // Old code 
     float angle = random(TWO_PI);
     vel = new PVector(cos(angle), sin(angle));
     
@@ -112,16 +113,7 @@ class Boid
   
   void repelForce(PVector source, float range)
   {
-    float forceScale = 2; // Make property of boid
-    
-    PVector repel = new PVector();
-    float d = PVector.sub(source, pos).mag();
-    if (d != 0 && d <= range) { // If there is a force 
-      repel = PVector.sub(pos, source);
-      repel.normalize();
-      repel.mult(map(d, range, 0, 0, forceScale * 150));
-    }
-    applyForce(repel);
+    // TODO: Implement
   }
   
   // Accumulate acceleration based on three rules

@@ -40,6 +40,7 @@ void draw(){
     a+=.1;//05;
 }
 
+/*
 class Circle2
 {
   
@@ -55,6 +56,7 @@ class Circle2
     
   }
 }
+*/
 
 class ColourGenerator
 {

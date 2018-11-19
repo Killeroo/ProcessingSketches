@@ -48,10 +48,16 @@ void drawSpiral(float x1, float y1, float turns, float len, float angle, int dep
   float x2 = x1 + len * cos(angle);
   float y2 = y1 - len * sin(angle);
   
-  // Draw da branch
-  line(x1, y1, x2, y2);
-  line(x1, y1, x1 - len * cos(angle), y1 + len * sin(angle));
-  line(x1, y2, x2, y1);
+  // Draw da branches
+  //line(x1, y1, x2, y2);
+  //line(x1, y1, x1 - len * cos(angle), y1 + len * sin(angle));
+  //line(x1, y2, x2, y1);
+  
+  line(x1, y1 + len, x2, y2 + len);
+  //line(x1, y2, x2, y1);
+  
+  //line(x1, y2, x2 + len, y1 - len);
+  //line(x1, y2, x2 - len, y1 + len);
   
   // Work out angle of next branch
   float nextAngle = angle + PI / (float) turns;

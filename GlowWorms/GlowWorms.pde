@@ -115,7 +115,6 @@ class Particle
   
   public void display()
   {
-    print(this.vel + "\n");
     fill(constrain(abs(this.vel.y) * 100, 0, 255), constrain(abs(this.vel.x) * 100, 0, 255), b, lifespan);
     
     ellipse(pos.x, pos.y, size * 4, size * 4);

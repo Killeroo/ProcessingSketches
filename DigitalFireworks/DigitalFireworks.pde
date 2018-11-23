@@ -1,9 +1,12 @@
 import java.util.Iterator;
 
+final float GRAVITY = 0.03; //0.05
+
 // TODO: Cleanup hacks
 // More vairation in movement
-// more colour
+// more colour per effect
 // more initial force
+// More sub particles
 
 ParticleSystem system = new ParticleSystem();
 ParticleSystem subSystem = new ParticleSystem();
@@ -27,7 +30,7 @@ void draw()
   if (millis() > interval) {
     Particle p = new Particle(new PVector(width/2, height));
     system.add(p);
-    interval = millis() + 500;//2500;
+    interval = millis() + 2500;//2500;
   }
 }
 
@@ -39,7 +42,7 @@ class ParticleSystem
   void add(Particle p)
   {
     // Apply some initial upward force
-    p.applyForce(new PVector(0, -7));
+    p.applyForce(new PVector(0, random(-7, -9)));
     particles.add(p);  
   }
   
@@ -61,11 +64,13 @@ class ParticleSystem
       
       // TODO: Hack only meant for sub particles, remove
       if (p.randomMovement) {
-        //p.applyForce(PVector.random2D());
+        p.applyForce(PVector.random2D());
       }
       
-      // Apply gravity
-      p.applyForce(new PVector(0, 0.05));
+      if (!p.noGravity) {
+        // Apply gravity
+        p.applyForce(new PVector(0, GRAVITY));
+      }
       
       // Move particle position
       p.move();
@@ -100,7 +105,11 @@ class Particle
   float r, g, b; // TODO: Switch to Color()
   int lifespan = 400;
   boolean exploded = false;
+  
+  boolean noGravity = false;
   boolean randomMovement = false;
+  
+  boolean subParticle = false;
   
   Particle(PVector p)
   {
@@ -118,20 +127,29 @@ class Particle
     pos.add(vel); // Apply our speed vector
     acc.mult(0);
     
-    // TODO: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks
-    if (vel.y > 0 && !exploded && !randomMovement) { 
+    // TODO: Kinda resolved hack but is there a better way to do this? (OLD: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks)
+    if (vel.y > 0 && !exploded && !subParticle) { 
        // Spawn a load of subparticles
-       for (int x = 0; x < 15; x++) {
+       for (int x = 0; x < 25; x++) {
          Particle p = new Particle(pos);
          p.applyForce(PVector.random2D());
          p.r = random(0, 255);
          p.g = random(0, 255);
          p.lifespan = 150;
-         p.randomMovement = true;
+         float chance = random(0, 1);
+         if (chance <= 0.25f) {
+           p.lifespan = 75;
+           p.randomMovement = true;
+         }
+         chance = random(0, 1);
+         if (chance <= 0.5f) {
+           p.lifespan = 225;
+           p.noGravity = true;
+         }
+         p.subParticle = true;
          subSystem.particles.add(p);
        }
        
-       println("EXPLODING");
        exploded = true;
     }
     

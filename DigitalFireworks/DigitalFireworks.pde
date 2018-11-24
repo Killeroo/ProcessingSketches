@@ -3,6 +3,13 @@ import java.util.Iterator;
 final float GRAVITY = 0.03; //0.05
 
 // TODO: Cleanup hacks
+// class it up
+// add to same particle system
+// partles that trail off
+// triangles
+//lines
+//sub sub explosions
+
 // More vairation in movement
 // more colour per effect
 // more initial force
@@ -30,7 +37,7 @@ void draw()
   if (millis() > interval) {
     Particle p = new Particle(new PVector(width/2, height));
     system.add(p);
-    interval = millis() + 2500;//2500;
+    interval = millis() + 4000;//2500;
   }
 }
 
@@ -101,7 +108,8 @@ class Particle
   PVector acc = new PVector(0, 0);
   PVector pos;
   
-  float mass = random(2, 2.5);
+  float size = 2;
+  float mass = random(2, 2.5); // TODO: this works i suppose?
   float r, g, b; // TODO: Switch to Color()
   int lifespan = 400;
   boolean exploded = false;
@@ -130,21 +138,25 @@ class Particle
     // TODO: Kinda resolved hack but is there a better way to do this? (OLD: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks)
     if (vel.y > 0 && !exploded && !subParticle) { 
        // Spawn a load of subparticles
-       for (int x = 0; x < 25; x++) {
+       // TODO: Cleanup?
+       for (int x = 0; x < 75; x++) {
          Particle p = new Particle(pos);
          p.applyForce(PVector.random2D());
          p.r = random(0, 255);
          p.g = random(0, 255);
          p.lifespan = 150;
+         p.size = 1;
          float chance = random(0, 1);
          if (chance <= 0.25f) {
            p.lifespan = 75;
            p.randomMovement = true;
+           p.size = 2;
          }
          chance = random(0, 1);
          if (chance <= 0.5f) {
            p.lifespan = 225;
            p.noGravity = true;
+           p.size = 2;
          }
          p.subParticle = true;
          subSystem.particles.add(p);
@@ -165,7 +177,7 @@ class Particle
   public void display()
   {
     fill(r, g, b, map(lifespan, 0, 400, 0, 255));
-    ellipse(pos.x, pos.y, 2, 2);
+    ellipse(pos.x, pos.y, size, size);
   }
   
   public boolean isDead()

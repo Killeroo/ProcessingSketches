@@ -7,6 +7,7 @@ final float GRAVITY = 0.03; //0.05
 // more initial force
 //sub sub explosions
 // triangles
+// Add octopus wandering
 
 // redo names and/or add description to each class
 

@@ -2,21 +2,15 @@ import java.util.Iterator;
 
 final float GRAVITY = 0.03; //0.05
 
-// TODO: Cleanup hacks
-// class it up
-// add to same particle system
-// partles that trail off
-// triangles
-//lines
-//sub sub explosions
-
 // More vairation in movement
 // more colour per effect
 // more initial force
-// More sub particles
+//sub sub explosions
+// triangles
+
+// redo names and/or add description to each class
 
 ParticleSystem system = new ParticleSystem();
-ParticleSystem subSystem = new ParticleSystem();
 int interval = 0;
 
 void setup()
@@ -32,7 +26,6 @@ void draw()
   rect(0, 0, width, height);
   
   system.update();
-  subSystem.update();
   
   if (millis() > interval) {
     Particle p = new Particle(new PVector(width/2, height));
@@ -44,9 +37,16 @@ void draw()
 
 class ParticleSystem
 {
+  // Privatise
+  
   ArrayList<Particle> particles = new ArrayList<Particle>();
   
-  void add(Particle p)
+  // All sub particles
+  ArrayList<Randomer> randomers = new ArrayList<Randomer>();
+  ArrayList<Floater> floaters = new ArrayList<Floater>();
+  ArrayList<Faller> fallers = new ArrayList<Faller>();
+  
+  void add(Particle p) // Change this, or add endpoints for subparticles?
   {
     // Apply some initial upward force
     p.applyForce(new PVector(0, random(-7, -9)));
@@ -55,29 +55,21 @@ class ParticleSystem
   
   void update()
   {  
+    this.updateParticles();
+    
+    this.updateRandomers();
+    this.updateFloaters();
+    this.updateFaller();
+  }
+  
+  void updateParticles()
+  {
     Iterator<Particle> i = particles.iterator();
-
     while (i.hasNext()) {
       Particle p = i.next();
       
-      // Remove any particles outside of the screen
-      if (p.pos.x > width || p.pos.x < 0) {
-        i.remove();
-        continue;
-      } //else if (p.pos.y > height || p.pos.y < 0) {
-        //i.remove();
-        //continue;
-      //}
-      
-      // TODO: Hack only meant for sub particles, remove
-      if (p.randomMovement) {
-        p.applyForce(PVector.random2D());
-      }
-      
-      if (!p.noGravity) {
-        // Apply gravity
-        p.applyForce(new PVector(0, GRAVITY));
-      }
+      // Apply gravity
+      p.applyForce(new PVector(0, GRAVITY));
       
       // Move particle position
       p.move();
@@ -94,15 +86,150 @@ class ParticleSystem
       } else {
         p.display();
       }
-      
     }
+  }
+  
+  void updateRandomers()
+  {
+    Iterator<Randomer> i = randomers.iterator();
+    while (i.hasNext()) {
+      Randomer r = i.next();
+      
+      r.applyForce(PVector.random2D());
+      r.move();
+      
+      if (r.isDead()) {
+        i.remove();
+      } else {
+        r.display();
+      }
+    }
+  }
+  
+  void updateFloaters()
+  {
+    Iterator<Floater> i = floaters.iterator();
+    while (i.hasNext()) {
+      Floater f = i.next();
+      
+      f.move();
+      
+      if (f.isDead()) {
+        i.remove();
+      } else {
+        f.display();
+      }
+    }
+  }
+  
+  void updateFaller()
+  {
+    Iterator<Faller> i = fallers.iterator();
+    while (i.hasNext()) {
+      Faller f = i.next();
+      
+      f.applyForce(new PVector(0, GRAVITY));
+      f.move();
+      
+      if (f.isDead()) {
+        i.remove();
+      } else {
+        f.display();
+      }
+    }
+  }
+}
+
+// TODO: limit speed
+class Randomer extends Particle
+{
+  public Randomer(PVector p)
+  {
+    super(p);  
+    
+    this.g = random(0, 255);
+    this.b = random(0, 255);
+    
+    this.subParticle = true;
+    this.applyForce(PVector.random2D());
+    this.lifespan = 75;
+    this.randomMovement = true;
+    this.size = 2;
+  }
+}
+
+class Faller extends Particle
+{
+  public Faller(PVector p)
+  {
+    super(p);
+    
+    this.r = random(0, 255);
+    this.b = random(0, 255);
+    
+    this.subParticle = true;
+    this.applyForce(PVector.random2D());
+    this.r = random(0, 255);
+    this.g = random(0, 255);
+    this.lifespan = 150;
+    this.size = 1;
+  }
+}
+
+class Floater extends Particle
+{
+  public Floater(PVector p)
+  {
+    super(p);
+    
+    this.r = random(0, 255);
+    this.g = random(0, 255);
+    
+    this.subParticle = true;
+    this.applyForce(PVector.random2D());
+    this.lifespan = 225;
+    this.noGravity = true;
+    this.size = 2;
+  }
+}
+
+class Trailer extends Particle
+{
+  // No gravity then fall off
+  public Trailer(PVector p)
+  {
+    super(p);
+    
+    
+  }
+}
+
+class Twister extends Particle
+{
+  // spiral off (affected by gravity)
+  public Twister(PVector p)
+  {
+    super(p);
+    
+    
+  }
+}
+
+class Lines extends Particle
+{
+  // Draw lines to other line particles
+  public Lines(PVector p)
+  {
+    super(p);
+    
+    
   }
 }
 
 class Particle
 {
-  final static float BOUNCE = -0.5;
-  final static float MAX_SPEED = 0.1;
+  // ######## CLEAN UP PROPERTIES #######
+  final static float MAX_SPEED = 0.1; // Remove
   
   PVector vel = new PVector(random(-MAX_SPEED, MAX_SPEED), random(-MAX_SPEED, MAX_SPEED));
   PVector acc = new PVector(0, 0);
@@ -110,13 +237,12 @@ class Particle
   
   float size = 2;
   float mass = random(2, 2.5); // TODO: this works i suppose?
-  float r, g, b; // TODO: Switch to Color()
+  float r, g, b; // Switch to Color()
   int lifespan = 400;
-  boolean exploded = false;
   
-  boolean noGravity = false;
-  boolean randomMovement = false;
-  
+  boolean exploded = false; // Remove?
+  boolean noGravity = false; // Remove
+  boolean randomMovement = false; // Remove
   boolean subParticle = false;
   
   Particle(PVector p)
@@ -138,28 +264,21 @@ class Particle
     // TODO: Kinda resolved hack but is there a better way to do this? (OLD: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks)
     if (vel.y > 0 && !exploded && !subParticle) { 
        // Spawn a load of subparticles
-       // TODO: Cleanup?
        for (int x = 0; x < 75; x++) {
-         Particle p = new Particle(pos);
-         p.applyForce(PVector.random2D());
-         p.r = random(0, 255);
-         p.g = random(0, 255);
-         p.lifespan = 150;
-         p.size = 1;
          float chance = random(0, 1);
-         if (chance <= 0.25f) {
-           p.lifespan = 75;
-           p.randomMovement = true;
-           p.size = 2;
+         if (chance <= 0.25) {
+           Randomer r = new Randomer(pos);
+           system.randomers.add(r);
+           continue;
+         } else if (chance <= 0.5f) {
+           Floater f = new Floater(pos);
+           system.floaters.add(f);
+           continue;
+         } else {
+           Faller fa = new Faller(pos);
+           system.fallers.add(fa);
+           continue;
          }
-         chance = random(0, 1);
-         if (chance <= 0.5f) {
-           p.lifespan = 225;
-           p.noGravity = true;
-           p.size = 2;
-         }
-         p.subParticle = true;
-         subSystem.particles.add(p);
        }
        
        exploded = true;

@@ -148,14 +148,14 @@ class Randomer extends Particle
   {
     super(p);  
     
-    this.g = random(0, 255);
-    this.b = random(0, 255);
+    this.r = random(150, 255);
+    this.g = 40;
     
     this.subParticle = true;
     this.applyForce(PVector.random2D());
-    this.lifespan = 75;
+    this.lifespan = 125;
     this.randomMovement = true;
-    this.size = 2;
+    this.size = 2.5;
   }
 }
 
@@ -166,14 +166,18 @@ class Faller extends Particle
     super(p);
     
     this.r = random(0, 255);
-    this.b = random(0, 255);
+    this.b = 0;
+    this.g = 0;
+    
+    this.vel = PVector.random2D();
+    this.acc = PVector.random2D();
     
     this.subParticle = true;
     this.applyForce(PVector.random2D());
     this.r = random(0, 255);
     this.g = random(0, 255);
-    this.lifespan = 150;
-    this.size = 1;
+    this.lifespan = 200;
+    this.size = 2;
   }
 }
 
@@ -187,10 +191,11 @@ class Floater extends Particle
     this.g = random(0, 255);
     
     this.subParticle = true;
+    this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.lifespan = 225;
+    this.lifespan = 175;
     this.noGravity = true;
-    this.size = 2;
+    this.size = 3;
   }
 }
 
@@ -222,8 +227,6 @@ class Lines extends Particle
   public Lines(PVector p)
   {
     super(p);
-    
-    
   }
 }
 

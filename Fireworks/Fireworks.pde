@@ -3,11 +3,11 @@ import java.util.Iterator;
 final float GRAVITY = 0.03; //0.05
 
 // More vairation in movement
-// more colour per effect
-// more initial force
 //sub sub explosions
 // triangles
 // Add octopus wandering
+// Add more variation to emittion patterns
+// Add multicolored ones
 
 // redo names and/or add description to each class
 
@@ -97,6 +97,7 @@ class ParticleSystem
       Randomer r = i.next();
       
       r.applyForce(PVector.random2D());
+      r.vel.limit(2); // TODO: Move limited amount to class
       r.move();
       
       if (r.isDead()) {
@@ -113,6 +114,7 @@ class ParticleSystem
     while (i.hasNext()) {
       Floater f = i.next();
       
+      f.vel.limit(1);
       f.move();
       
       if (f.isDead()) {
@@ -141,7 +143,6 @@ class ParticleSystem
   }
 }
 
-// TODO: limit speed
 class Randomer extends Particle
 {
   public Randomer(PVector p)
@@ -150,6 +151,7 @@ class Randomer extends Particle
     
     this.r = random(150, 255);
     this.g = 40;
+    this.b = random(0, 150);
     
     this.subParticle = true;
     this.applyForce(PVector.random2D());
@@ -165,19 +167,17 @@ class Faller extends Particle
   {
     super(p);
     
-    this.r = random(0, 255);
+    this.r = random(75, 125);
     this.b = 0;
-    this.g = 0;
+    this.g = random(0, 255);
     
-    this.vel = PVector.random2D();
-    this.acc = PVector.random2D();
+    this.vel = PVector.random2D().limit(random(1,2));
+    this.acc = PVector.random2D().limit(random(1,2));
     
     this.subParticle = true;
-    this.applyForce(PVector.random2D());
-    this.r = random(0, 255);
-    this.g = random(0, 255);
-    this.lifespan = 200;
-    this.size = 2;
+    this.applyForce(PVector.random2D().limit(random(1,2)));
+    this.lifespan = 250;
+    this.size = 1;
   }
 }
 
@@ -187,15 +187,16 @@ class Floater extends Particle
   {
     super(p);
     
-    this.r = random(0, 255);
-    this.g = random(0, 255);
+    this.r = random(200, 255);
+    this.g = random(200, 255);
+    this.b = 0;
     
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.lifespan = 175;
+    this.lifespan = 125;
     this.noGravity = true;
-    this.size = 3;
+    this.size = 2 ;
   }
 }
 
@@ -268,21 +269,23 @@ class Particle
     // TODO: Kinda resolved hack but is there a better way to do this? (OLD: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks)
     if (vel.y > 0 && !exploded && !subParticle) { 
        // Spawn a load of subparticles
-       for (int x = 0; x < 75; x++) {
+       for (int x = 0; x < 100; x++) {
          float chance = random(0, 1);
          if (chance <= 0.25) {
            Randomer r = new Randomer(pos);
            system.randomers.add(r);
-           continue;
+           //continue;
          } else if (chance <= 0.5f) {
            Floater f = new Floater(pos);
            system.floaters.add(f);
-           continue;
+           //continue;
          } else {
            Faller fa = new Faller(pos);
            system.fallers.add(fa);
-           continue;
+           //continue;
          }
+           Randomer r = new Randomer(pos);
+           system.randomers.add(r);
        }
        
        exploded = true;

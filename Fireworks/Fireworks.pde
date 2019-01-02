@@ -63,6 +63,7 @@ class ParticleSystem
     this.updateFaller();
   }
   
+  // TODO: Rename
   void updateParticles()
   {
     Iterator<Particle> i = particles.iterator();
@@ -114,7 +115,7 @@ class ParticleSystem
     while (i.hasNext()) {
       Floater f = i.next();
       
-      f.vel.limit(1);
+      //f.vel.limit(1);
       f.move();
       
       if (f.isDead()) {
@@ -273,19 +274,25 @@ class Particle
          float chance = random(0, 1);
          if (chance <= 0.25) {
            Randomer r = new Randomer(pos);
-           system.randomers.add(r);
+           //system.randomers.add(r);
            //continue;
          } else if (chance <= 0.5f) {
            Floater f = new Floater(pos);
-           system.floaters.add(f);
+           //system.floaters.add(f);
            //continue;
          } else {
            Faller fa = new Faller(pos);
-           system.fallers.add(fa);
+           //system.fallers.add(fa);
            //continue;
          }
            Randomer r = new Randomer(pos);
            system.randomers.add(r);
+           
+           Faller fa = new Faller(pos);
+           system.fallers.add(fa);
+           
+           Floater f = new Floater(pos);
+           system.floaters.add(f);
        }
        
        exploded = true;

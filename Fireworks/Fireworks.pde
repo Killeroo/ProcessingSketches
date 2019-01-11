@@ -46,6 +46,7 @@ class ParticleSystem
   ArrayList<Randomer> randomers = new ArrayList<Randomer>();
   ArrayList<Floater> floaters = new ArrayList<Floater>();
   ArrayList<Faller> fallers = new ArrayList<Faller>();
+  ArrayList<Twister> twisters = new ArrayList<Twister>();
   
   void add(Particle p) // Change this, or add endpoints for subparticles?
   {
@@ -60,7 +61,8 @@ class ParticleSystem
     
     this.updateRandomers();
     this.updateFloaters();
-    this.updateFaller();
+    this.updateFallers();
+    this.updateTwisters();
   }
   
   // TODO: Rename
@@ -126,7 +128,7 @@ class ParticleSystem
     }
   }
   
-  void updateFaller()
+  void updateFallers()
   {
     Iterator<Faller> i = fallers.iterator();
     while (i.hasNext()) {
@@ -142,6 +144,23 @@ class ParticleSystem
       }
     }
   }
+  
+  void updateTwisters()
+  {
+    Iterator<Twister> i = twisters.iterator();
+    while (i.hasNext()) {
+      Twister t = i.next();
+      
+      t.applyForce(new PVector(0, GRAVITY));
+      t.move();
+      
+      if (t.isDead()) {
+        i.remove();
+      } else {
+        t.display();
+      }
+    }
+  }
 }
 
 class Randomer extends Particle
@@ -149,15 +168,11 @@ class Randomer extends Particle
   public Randomer(PVector p)
   {
     super(p);  
-    
-    this.r = random(150, 255);
-    this.g = 40;
-    this.b = random(0, 150);
-    
+
+    this.c = color(random(150, 255), 40, random(0, 150));
     this.subParticle = true;
     this.applyForce(PVector.random2D());
     this.lifespan = 125;
-    this.randomMovement = true;
     this.size = 2.5;
   }
 }
@@ -168,12 +183,9 @@ class Faller extends Particle
   {
     super(p);
     
-    this.r = random(75, 125);
-    this.b = 0;
-    this.g = random(0, 255);
-    
-    this.vel = PVector.random2D().limit(random(1,2));
-    this.acc = PVector.random2D().limit(random(1,2));
+    this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.c = color(random(75, 125), 0, random(0, 255));
     
     this.subParticle = true;
     this.applyForce(PVector.random2D().limit(random(1,2)));
@@ -188,15 +200,12 @@ class Floater extends Particle
   {
     super(p);
     
-    this.r = random(200, 255);
-    this.g = random(200, 255);
-    this.b = 0;
+    this.c = color(random(200, 255), random(200, 255), 0);
     
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
     this.lifespan = 125;
-    this.noGravity = true;
     this.size = 2 ;
   }
 }
@@ -214,12 +223,35 @@ class Trailer extends Particle
 
 class Twister extends Particle
 {
+  float theta;
+  float rot;
+ 
   // spiral off (affected by gravity)
   public Twister(PVector p)
   {
     super(p);
+    this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.c = color(random(75, 125), random(0, 255), random(0, 255));
+    this.rot = random(50, 150);
     
+    this.subParticle = true;
+    this.applyForce(PVector.random2D().limit(random(1,2)));
+    this.lifespan = 300;
+    this.size = 1;
+  }
+  
+  void display()
+  {
+    fill(c, map(lifespan, 0, 400, 0, 255));
     
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(theta);
+    theta += TWO_PI/rot;
+    ellipse(5, 5, size-2, size-2);
+    ellipse(-5, -5, size-2, size-2);
+    popMatrix();
   }
 }
 
@@ -234,31 +266,23 @@ class Lines extends Particle
 
 class Particle
 {
-  // ######## CLEAN UP PROPERTIES #######
-  final static float MAX_SPEED = 0.1; // Remove
-  
-  PVector vel = new PVector(random(-MAX_SPEED, MAX_SPEED), random(-MAX_SPEED, MAX_SPEED));
+  PVector vel = new PVector(0, 0);
   PVector acc = new PVector(0, 0);
   PVector pos;
   
   float size = 2;
   float mass = random(2, 2.5); // TODO: this works i suppose?
-  float r, g, b; // Switch to Color()
+  color c;
   int lifespan = 400;
   
-  boolean exploded = false; // Remove?
-  boolean noGravity = false; // Remove
-  boolean randomMovement = false; // Remove
   boolean subParticle = false;
+  boolean exploded = false; // TODO: Find a way to remove this filthy hack
   
   Particle(PVector p)
   {
     pos = new PVector (p.x, p.y);
     acc = new PVector (random(-0.1, 0.1), 0);
-    
-    r = 255;
-    g = 255;
-    b = 255;
+    c = color(255, 255, 255);
   }
   
   public void move()
@@ -267,37 +291,12 @@ class Particle
     pos.add(vel); // Apply our speed vector
     acc.mult(0);
     
-    // TODO: Kinda resolved hack but is there a better way to do this? (OLD: this not random movement is a hack to stop subparticles from adding more particles, find a way to flag them apart and clean up other hacks)
+    // TODO: Get rid of exploded, HACKS
     if (vel.y > 0 && !exploded && !subParticle) { 
-       // Spawn a load of subparticles
-       for (int x = 0; x < 100; x++) {
-         float chance = random(0, 1);
-         if (chance <= 0.25) {
-           Randomer r = new Randomer(pos);
-           //system.randomers.add(r);
-           //continue;
-         } else if (chance <= 0.5f) {
-           Floater f = new Floater(pos);
-           //system.floaters.add(f);
-           //continue;
-         } else {
-           Faller fa = new Faller(pos);
-           //system.fallers.add(fa);
-           //continue;
-         }
-           Randomer r = new Randomer(pos);
-           system.randomers.add(r);
-           
-           Faller fa = new Faller(pos);
-           system.fallers.add(fa);
-           
-           Floater f = new Floater(pos);
-           system.floaters.add(f);
-       }
-       
-       exploded = true;
+      explode();
     }
     
+    // Decrease particle lifespan
     lifespan--;
   }
   
@@ -307,9 +306,17 @@ class Particle
     acc.add(f);
   }
   
+  public void explode()
+  {
+    //FallerEmission(pos);
+    //MixedEmission(pos);
+    FullEmission(pos);
+    exploded = true;
+  }
+  
   public void display()
   {
-    fill(r, g, b, map(lifespan, 0, 400, 0, 255));
+    fill(c, map(lifespan, 0, 400, 0, 255));
     ellipse(pos.x, pos.y, size, size);
   }
   
@@ -320,5 +327,57 @@ class Particle
     } else {
       return false;
     }
+  }
+}
+
+// Emission patters
+// (Different ways the fireworks explode)
+
+// Spawn every type of particle
+void FullEmission(PVector pos)
+{
+  int particles = (int) random(100, 200);
+  
+  for (int x = 0; x < particles; x++) {
+    Randomer r = new Randomer(pos);
+    Faller fa = new Faller(pos);
+    Floater f = new Floater(pos);
+    Twister t = new Twister(pos);
+    
+    system.randomers.add(r);
+    system.fallers.add(fa);
+    system.floaters.add(f);
+    system.twisters.add(t);
+  }
+}
+
+// Spawn a random mix
+void MixedEmission(PVector pos)
+{
+   for (int x = 0; x < 250; x++) {
+     float chance = random(0, 1);
+     if (chance <= 0.25) {
+       Randomer r = new Randomer(pos);
+       system.randomers.add(r);
+       continue;
+     } else {
+       Floater f = new Floater(pos);
+       system.floaters.add(f);
+       continue;
+     } //else {
+     //  Faller fa = new Faller(pos);
+     //  system.fallers.add(fa);
+     //  continue;
+     //}
+   }
+}
+
+// Spawn just fallers
+void FallerEmission(PVector pos)
+{
+  for (int x = 0; x < 500; x++) {
+    Faller f = new Faller(pos);
+    f.c = color(random(0, 255), random(0, 255), random(0, 255));
+    system.fallers.add(f);
   }
 }

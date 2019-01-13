@@ -117,7 +117,17 @@ class ParticleSystem
     while (i.hasNext()) {
       Floater f = i.next();
       
-      //f.vel.limit(1);
+      //f.vel.limit(1.5);
+      
+      if (f.lifespan < 75) {
+        
+        f.applyForce(new PVector(0, 0.15));
+      } else {
+        
+        f.vel.limit(1.5);
+      }
+      
+      
       f.move();
       
       if (f.isDead()) {
@@ -151,7 +161,7 @@ class ParticleSystem
     while (i.hasNext()) {
       Twister t = i.next();
       
-      t.applyForce(new PVector(0, GRAVITY));
+      t.applyForce(new PVector(0, 0.05));
       t.move();
       
       if (t.isDead()) {
@@ -232,17 +242,20 @@ class Twister extends Particle
     super(p);
     this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
     this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
-    this.c = color(random(75, 125), random(0, 255), random(0, 255));
+    this.c = color(random(25, 255), random(75, 125), 0);
     this.rot = random(50, 150);
     
     this.subParticle = true;
     this.applyForce(PVector.random2D().limit(random(1,2)));
-    this.lifespan = 300;
+    this.lifespan = 250;
     this.size = 1;
   }
   
   void display()
   {
+    //fill(255, map(lifespan, 0, 400, 0, 255));
+    //ellipse(pos.x, pos.y, size, size);
+    
     fill(c, map(lifespan, 0, 400, 0, 255));
     
     pushMatrix();

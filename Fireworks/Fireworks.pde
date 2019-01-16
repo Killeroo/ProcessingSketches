@@ -117,14 +117,13 @@ class ParticleSystem
     while (i.hasNext()) {
       Floater f = i.next();
       
-      //f.vel.limit(1.5);
-      
       if (f.lifespan < 75) {
         
-        f.applyForce(new PVector(0, 0.15));
+        f.applyForce(new PVector(0, 0.075));//1));//0.05));
+        f.vel.limit(1); //1 //0.05);
       } else {
         
-        f.vel.limit(1.5);
+        f.vel.limit(2);//2.5); //1.5);
       }
       
       
@@ -200,7 +199,7 @@ class Faller extends Particle
     this.subParticle = true;
     this.applyForce(PVector.random2D().limit(random(1,2)));
     this.lifespan = 250;
-    this.size = 1;
+    this.size = 3;
   }
 }
 
@@ -215,7 +214,7 @@ class Floater extends Particle
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.lifespan = 125;
+    this.lifespan = 175;//125;
     this.size = 2 ;
   }
 }
@@ -248,7 +247,7 @@ class Twister extends Particle
     this.subParticle = true;
     this.applyForce(PVector.random2D().limit(random(1,2)));
     this.lifespan = 250;
-    this.size = 1;
+    this.size = 2;
   }
   
   void display()
@@ -262,8 +261,8 @@ class Twister extends Particle
     translate(pos.x, pos.y);
     rotate(theta);
     theta += TWO_PI/rot;
-    ellipse(5, 5, size-2, size-2);
-    ellipse(-5, -5, size-2, size-2);
+    ellipse(5, 5, size, size);
+    ellipse(-5, -5, size, size);
     popMatrix();
   }
 }
@@ -289,7 +288,7 @@ class Particle
   int lifespan = 400;
   
   boolean subParticle = false;
-  boolean exploded = false; // TODO: Find a way to remove this filthy hack
+  boolean exploded = false;
   
   Particle(PVector p)
   {
@@ -321,9 +320,19 @@ class Particle
   
   public void explode()
   {
+    
+    float chance = random(0, 1);
+    if (chance <= 0.1) {
+      FullEmission(pos);
+    } else if ( chance <= 0.5) {
+      MixedEmission(pos);  
+    } else {
+      FallerEmission(pos);  
+    }
+    
     //FallerEmission(pos);
     //MixedEmission(pos);
-    FullEmission(pos);
+    //FullEmission(pos);
     exploded = true;
   }
   
@@ -349,7 +358,7 @@ class Particle
 // Spawn every type of particle
 void FullEmission(PVector pos)
 {
-  int particles = (int) random(100, 200);
+  int particles = (int) random(100, 400);
   
   for (int x = 0; x < particles; x++) {
     Randomer r = new Randomer(pos);
@@ -375,11 +384,20 @@ void MixedEmission(PVector pos)
        continue;
      } else {
        Floater f = new Floater(pos);
+       f.c = color(random(0, 255), random(0, 255), random(0, 255));
        system.floaters.add(f);
-       continue;
-     } //else {
+       //continue;
+     } 
+     
+     //chance = random(0, 1);
+     //if (chance <= 0.50) {
      //  Faller fa = new Faller(pos);
      //  system.fallers.add(fa);
+     //  fa.c = color(random(75, 230), 0, random(130, 250));
+     //  continue;
+     //} else {
+     //  Twister t = new Twister(pos);
+     //  system.twisters.add(t);
      //  continue;
      //}
    }
@@ -388,9 +406,14 @@ void MixedEmission(PVector pos)
 // Spawn just fallers
 void FallerEmission(PVector pos)
 {
-  for (int x = 0; x < 500; x++) {
+  int particles = (int) random(400, 600);
+  
+  for (int x = 0; x < particles; x++) {
     Faller f = new Faller(pos);
+    f.size = 1.5;
+    Twister t = new Twister(pos);
     f.c = color(random(0, 255), random(0, 255), random(0, 255));
     system.fallers.add(f);
+    system.twisters.add(t);
   }
 }

@@ -31,7 +31,7 @@ void draw()
   if (millis() > interval) {
     Particle p = new Particle(new PVector(width/2, height));
     system.add(p);
-    interval = millis() + 4000;//2500;
+    interval = millis() + 2000;//2500;
   }
 }
 
@@ -51,7 +51,7 @@ class ParticleSystem
   void add(Particle p) // Change this, or add endpoints for subparticles?
   {
     // Apply some initial upward force
-    p.applyForce(new PVector(0, random(-7, -9)));
+    p.applyForce(new PVector(0, random(-7, -12)));
     particles.add(p);  
   }
   
@@ -322,12 +322,13 @@ class Particle
   {
     
     float chance = random(0, 1);
-    if (chance <= 0.1) {
+    if (chance <= 0.25) {
       FullEmission(pos);
     } else if ( chance <= 0.5) {
-      MixedEmission(pos);  
-    } else {
-      FallerEmission(pos);  
+      FallerEmission(pos); 
+    } else { 
+      SprawlingEmission(pos);
+      //MixedEmission(pos);  
     }
     
     //FallerEmission(pos);
@@ -403,16 +404,34 @@ void MixedEmission(PVector pos)
    }
 }
 
+void SprawlingEmission(PVector pos)
+{
+  int particles = (int) random(400, 500);
+  int red = int(random(0, 255));
+  int green = int(random(0, 255));
+  int blue = int(random(0, 255));
+ 
+  for (int x = 0; x < particles; x++) {
+    Randomer r = new Randomer(pos);
+    int new_r = red + (int) random(0, 100);
+    int new_g = green + (int) random(0, 100);
+    int new_b = blue + (int) random(0, 100);
+    r.c = color(new_r, new_g, new_b);
+    system.randomers.add(r);
+  }
+}
+
 // Spawn just fallers
 void FallerEmission(PVector pos)
 {
-  int particles = (int) random(400, 600);
+  int particles = (int) random(250, 450);
   
   for (int x = 0; x < particles; x++) {
     Faller f = new Faller(pos);
     f.size = 1.5;
     Twister t = new Twister(pos);
     f.c = color(random(0, 255), random(0, 255), random(0, 255));
+    t.c = color(random(0, 255), random(0, 255), random(0, 255));
     system.fallers.add(f);
     system.twisters.add(t);
   }

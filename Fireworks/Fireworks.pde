@@ -194,7 +194,7 @@ class Faller extends Particle
     
     this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
     this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
-    this.c = color(random(75, 125), 0, random(0, 255));
+    this.c = color(random(0, 200), random(25, 100), random(0, 255));//color(random(75, 125), 0, random(0, 255));
     
     this.subParticle = true;
     this.applyForce(PVector.random2D().limit(random(1,2)));
@@ -323,13 +323,14 @@ class Particle
     
     float chance = random(0, 1);
     if (chance <= 0.25) {
-      FullEmission(pos);
+      //FullEmission(pos);
     } else if ( chance <= 0.5) {
-      FallerEmission(pos); 
+      //FallerEmission(pos); 
     } else { 
-      SprawlingEmission(pos);
+      //SprawlingEmission(pos);
       //MixedEmission(pos);  
     }
+    CompleteEmission(pos);
     
     //FallerEmission(pos);
     //MixedEmission(pos);
@@ -434,5 +435,33 @@ void FallerEmission(PVector pos)
     t.c = color(random(0, 255), random(0, 255), random(0, 255));
     system.fallers.add(f);
     system.twisters.add(t);
+  }
+}
+
+void CompleteEmission(PVector pos)
+{
+  int particles = (int) random(10, 500);
+  
+  for (int x = 0; x < particles; x++) {
+    int count = (int) random(1, 4);
+    switch(count)
+    {
+      case 1:
+        Randomer r = new Randomer(pos);
+        system.randomers.add(r);
+        break;
+      case 2:
+        Twister t = new Twister(pos);
+        system.twisters.add(t);
+        break;
+      case 3:
+        Faller f = new Faller(pos);
+        system.fallers.add(f);
+        break;
+      case 4:
+        Floater fl = new Floater(pos);
+        system.floaters.add(fl);
+        break;
+    }
   }
 }

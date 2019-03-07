@@ -203,6 +203,7 @@ class Faller extends Particle
   }
 }
 
+// TODO: Swap the name between this? (it falls eventually?, maybe have one actually just floats?)
 class Floater extends Particle
 {
   public Floater(PVector p)
@@ -219,6 +220,27 @@ class Floater extends Particle
   }
 }
 
+class Sparkler extends Particle
+{
+  
+  public Sparkler(PVector p)
+  {
+    super(p);
+    
+  }
+
+  void Display()
+  {
+    fill(amplify(colour.R),amplify(colour.B),amplify(colour.G), random(0, 255));
+    
+    ellipse(random(pos.x-(15), pos.x+(15)),random(pos.y-(15),pos.y+(15)), random(1,3), random(1,3));
+    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+  }
+}
+
+// TODO: Not needed?
 class Trailer extends Particle
 {
   // No gravity then fall off
@@ -440,7 +462,12 @@ void FallerEmission(PVector pos)
 
 void CompleteEmission(PVector pos)
 {
-  int particles = (int) random(10, 500);
+  int particles = (int) random(10, 300);
+  
+  // Switch to using different compbinations of complimentary colours (adobe colour wheel)
+  int base_red = (int) random(0, 255);
+  int base_green = (int) random(0, 255);
+  int base_blue = (int) random(0, 255);
   
   for (int x = 0; x < particles; x++) {
     int count = (int) random(1, 4);
@@ -448,15 +475,17 @@ void CompleteEmission(PVector pos)
     {
       case 1:
         Randomer r = new Randomer(pos);
-        system.randomers.add(r);
+        //system.randomers.add(r);
         break;
       case 2:
         Twister t = new Twister(pos);
-        system.twisters.add(t);
+        t.c = color((int) random(0, 255), base_green + (int) random(0, 25), base_blue);
+        //system.twisters.add(t);
         break;
       case 3:
         Faller f = new Faller(pos);
-        system.fallers.add(f);
+        f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
+        //system.fallers.add(f);
         break;
       case 4:
         Floater fl = new Floater(pos);
@@ -464,4 +493,8 @@ void CompleteEmission(PVector pos)
         break;
     }
   }
+}
+
+float amplify(float n) {
+  return constrain(2 * n, 0, 255);
 }

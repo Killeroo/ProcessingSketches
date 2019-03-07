@@ -16,7 +16,7 @@ int interval = 0;
 
 void setup()
 {
-  size(500, 500);  
+  size(1000, 1000);  
 }
 
 void draw()
@@ -119,7 +119,7 @@ class ParticleSystem
       
       if (f.lifespan < 75) {
         
-        f.applyForce(new PVector(0, 0.075));//1));//0.05));
+        //f.applyForce(new PVector(0, 0.075));//1));//0.05));
         f.vel.limit(1); //1 //0.05);
       } else {
         
@@ -160,7 +160,7 @@ class ParticleSystem
     while (i.hasNext()) {
       Twister t = i.next();
       
-      t.applyForce(new PVector(0, 0.05));
+      t.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
       t.move();
       
       if (t.isDead()) {
@@ -231,7 +231,7 @@ class Sparkler extends Particle
 
   void Display()
   {
-    fill(amplify(colour.R),amplify(colour.B),amplify(colour.G), random(0, 255));
+    //fill(amplify(colour.R),amplify(colour.B),amplify(colour.G), random(0, 255));
     
     ellipse(random(pos.x-(15), pos.x+(15)),random(pos.y-(15),pos.y+(15)), random(1,3), random(1,3));
     point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
@@ -462,7 +462,7 @@ void FallerEmission(PVector pos)
 
 void CompleteEmission(PVector pos)
 {
-  int particles = (int) random(10, 300);
+  int particles = (int) random(10, 500);
   
   // Switch to using different compbinations of complimentary colours (adobe colour wheel)
   int base_red = (int) random(0, 255);
@@ -480,11 +480,11 @@ void CompleteEmission(PVector pos)
       case 2:
         Twister t = new Twister(pos);
         t.c = color((int) random(0, 255), base_green + (int) random(0, 25), base_blue);
-        //system.twisters.add(t);
+        system.twisters.add(t);
         break;
       case 3:
         Faller f = new Faller(pos);
-        f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
+        //f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
         //system.fallers.add(f);
         break;
       case 4:

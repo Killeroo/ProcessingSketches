@@ -197,9 +197,9 @@ class Faller extends Particle
     this.c = color(random(0, 200), random(25, 100), random(0, 255));//color(random(75, 125), 0, random(0, 255));
     
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(1,2)));
+    this.applyForce(PVector.random2D().limit(random(2,6)));//1, 2)));
     this.lifespan = 250;
-    this.size = 3;
+    this.size = 1;
   }
 }
 
@@ -216,7 +216,7 @@ class Floater extends Particle
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
     this.lifespan = 175;//125;
-    this.size = 2 ;
+    this.size = 3;
   }
 }
 
@@ -470,7 +470,7 @@ void CompleteEmission(PVector pos)
   int base_blue = (int) random(0, 255);
   
   for (int x = 0; x < particles; x++) {
-    int count = (int) random(1, 4);
+    int count = (int) random(1, 5);
     switch(count)
     {
       case 1:
@@ -479,16 +479,21 @@ void CompleteEmission(PVector pos)
         break;
       case 2:
         Twister t = new Twister(pos);
-        t.c = color((int) random(0, 255), base_green + (int) random(0, 25), base_blue);
+        t.c = color(base_red + (int) random(0, 25), base_green + (int) random(0, 25), base_blue);
+        //color((int) random(0, 255), base_green + (int) random(0, 25), base_blue);
         system.twisters.add(t);
         break;
       case 3:
-        Faller f = new Faller(pos);
-        //f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
-        //system.fallers.add(f);
+        for (int i = 0; i < 5; i++) {
+          Faller f = new Faller(pos);
+          f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
+          system.fallers.add(f);
+        }
         break;
       case 4:
         Floater fl = new Floater(pos);
+        fl.c = color(base_blue, base_red + (int) random(0, 25), base_green + (int) random(0, 25));
+        //color((int) random(0, 255), base_blue, base_green + (int) random(0, 25));
         system.floaters.add(fl);
         break;
     }

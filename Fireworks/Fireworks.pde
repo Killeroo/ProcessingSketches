@@ -170,6 +170,24 @@ class ParticleSystem
       }
     }
   }
+  
+  void updateSparklers()
+  {
+    Iterator<Sparkler> i = sparklers.iterator();
+    while (i.hasNext()) {
+      Sparkler s = i.next();
+      
+      s.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
+      s.move();
+      
+      if (s.isDead()) {
+        i.remove();
+      } else {
+        s.display();
+      }
+    }
+    
+  }
 }
 
 class Randomer extends Particle
@@ -192,8 +210,8 @@ class Faller extends Particle
   {
     super(p);
     
-    this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
-    this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.vel = PVector.random2D().limit(random(3,6));//(0.5, 1));//random(1,2));
+    this.acc = PVector.random2D().limit(random(3,6));//(random(0.5, 1));//random(1,2));
     this.c = color(random(0, 200), random(25, 100), random(0, 255));//color(random(75, 125), 0, random(0, 255));
     
     this.subParticle = true;
@@ -231,7 +249,7 @@ class Sparkler extends Particle
 
   void Display()
   {
-    //fill(amplify(colour.R),amplify(colour.B),amplify(colour.G), random(0, 255));
+    fill(c, random(0, 255));
     
     ellipse(random(pos.x-(15), pos.x+(15)),random(pos.y-(15),pos.y+(15)), random(1,3), random(1,3));
     point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 

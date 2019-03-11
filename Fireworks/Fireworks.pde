@@ -47,6 +47,7 @@ class ParticleSystem
   ArrayList<Floater> floaters = new ArrayList<Floater>();
   ArrayList<Faller> fallers = new ArrayList<Faller>();
   ArrayList<Twister> twisters = new ArrayList<Twister>();
+  ArrayList<Sparkler> sparklers = new ArrayList<Sparkler>();
   
   void add(Particle p) // Change this, or add endpoints for subparticles?
   {
@@ -63,6 +64,7 @@ class ParticleSystem
     this.updateFloaters();
     this.updateFallers();
     this.updateTwisters();
+    this.updateSparklers();
   }
   
   // TODO: Rename
@@ -177,7 +179,19 @@ class ParticleSystem
     while (i.hasNext()) {
       Sparkler s = i.next();
       
-      s.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
+      //s.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
+      //s.move();
+      
+      if (s.lifespan < 175) {
+        
+        s.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
+        s.vel.limit(0.5); //1 //0.05);
+        s.sparkle();
+      } else {
+        s.display();
+        //s.vel.limit(2);//2.5); //1.5);
+      }
+      
       s.move();
       
       if (s.isDead()) {
@@ -240,21 +254,36 @@ class Floater extends Particle
 
 class Sparkler extends Particle
 {
+  int r, g, b;
   
-  public Sparkler(PVector p)
+  public Sparkler(PVector p, int _r, int _g, int _b)
   {
     super(p);
     
+    this.lifespan = 255;
+    this.subParticle = true;
+    this.applyForce(PVector.random2D().limit(random(1,7)));
+    
+    this.r = _r;
+    this.g = _g;
+    this.b = _b;
   }
 
-  void Display()
+  void sparkle()
   {
-    fill(c, random(0, 255));
+    //fill(c, lifespan); //255);
     
-    ellipse(random(pos.x-(15), pos.x+(15)),random(pos.y-(15),pos.y+(15)), random(1,3), random(1,3));
-    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
-    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
-    point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+    // HACK: change 
+    if (((int) random(0, 2)) < 1){
+      return;
+    }
+    
+    fill(amplify(r), amplify(g), amplify(b), lifespan);//random(0,100));
+    
+    ellipse(random(pos.x-(5), pos.x+(5)),random(pos.y-(5),pos.y+(5)), random(1,3), random(1,3));
+    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
+    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
   }
 }
 
@@ -488,6 +517,10 @@ void CompleteEmission(PVector pos)
   int base_blue = (int) random(0, 255);
   
   for (int x = 0; x < particles; x++) {
+    Sparkler s =new Sparkler(pos, base_red, base_green, base_blue);
+    s.c = color(base_red, base_green, base_blue);
+    system.sparklers.add(s);
+    
     int count = (int) random(1, 5);
     switch(count)
     {

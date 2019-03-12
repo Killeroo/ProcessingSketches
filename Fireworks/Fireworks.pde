@@ -49,10 +49,13 @@ class ParticleSystem
   ArrayList<Twister> twisters = new ArrayList<Twister>();
   ArrayList<Sparkler> sparklers = new ArrayList<Sparkler>();
   
+  ArrayList<Trailer> trailers = new ArrayList<Trailer>();
+  
+  
   void add(Particle p) // Change this, or add endpoints for subparticles?
   {
     // Apply some initial upward force
-    p.applyForce(new PVector(0, random(-7, -12)));
+    p.applyForce(new PVector(0, random(-7, -25)));
     particles.add(p);  
   }
   
@@ -65,6 +68,7 @@ class ParticleSystem
     this.updateFallers();
     this.updateTwisters();
     this.updateSparklers();
+    this.updateTrailers();
   }
   
   // TODO: Rename
@@ -119,16 +123,7 @@ class ParticleSystem
     while (i.hasNext()) {
       Floater f = i.next();
       
-      if (f.lifespan < 75) {
-        
-        //f.applyForce(new PVector(0, 0.075));//1));//0.05));
-        f.vel.limit(1); //1 //0.05);
-      } else {
-        
-        f.vel.limit(2);//2.5); //1.5);
-      }
-      
-      
+      f.vel.limit(2);
       f.move();
       
       if (f.isDead()) {
@@ -179,18 +174,22 @@ class ParticleSystem
     while (i.hasNext()) {
       Sparkler s = i.next();
       
-      //s.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
-      //s.move();
-      
-      if (s.lifespan < 175) {
+      if (s.lifespan < 225) {
         
         s.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
         s.vel.limit(0.5); //1 //0.05);
-        s.sparkle();
+        
+        if (s.vel.y > 0) {
+          //s.sparkle();
+        } else {
+          //s.display();
+        }
       } else {
-        s.display();
-        //s.vel.limit(2);//2.5); //1.5);
+        //s.display();
       }
+      
+      s.sparkle();
+      
       
       s.move();
       
@@ -201,6 +200,28 @@ class ParticleSystem
       }
     }
     
+  }
+  
+  void updateTrailers()
+  {
+    Iterator<Trailer> i = trailers.iterator();
+    while (i.hasNext()) {
+      Trailer t = i.next();
+      
+      if (t.lifespan < 175) {
+        
+        t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
+        t.vel.limit(0.5); //1 //0.05);
+      } 
+      
+      t.move();
+      
+      if (t.isDead()) {
+        i.remove();
+      } else {
+        t.display();
+      }
+    }
   }
 }
 
@@ -260,9 +281,10 @@ class Sparkler extends Particle
   {
     super(p);
     
-    this.lifespan = 255;
+    this.lifespan = 315;
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(1,7)));
+    this.vel = PVector.random2D().limit(random(0.25, 0.5));//random(0.5, 1));//random(1,2));
+    this.acc = PVector.random2D().limit(random(0.25, 0.5));//random(0.5, 1));//random(1,2));
     
     this.r = _r;
     this.g = _g;
@@ -271,31 +293,21 @@ class Sparkler extends Particle
 
   void sparkle()
   {
-    //fill(c, lifespan); //255);
-    
-    // HACK: change 
-    if (((int) random(0, 2)) < 1){
-      return;
-    }
-    
-    fill(amplify(r), amplify(g), amplify(b), lifespan);//random(0,100));
-    
+    fill(r, b, g, lifespan);
     ellipse(random(pos.x-(5), pos.x+(5)),random(pos.y-(5),pos.y+(5)), random(1,3), random(1,3));
-    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
-    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
-    //point(random(pos.x-15, pos.x+15),random(pos.y-15,pos.y-15)); 
   }
 }
 
-// TODO: Not needed?
+// No gravity then fall off
 class Trailer extends Particle
 {
-  // No gravity then fall off
   public Trailer(PVector p)
   {
     super(p);
     
-    
+    this.lifespan = 255;
+    this.subParticle = true;
+    this.applyForce(PVector.random2D().limit(random(1,7)));
   }
 }
 
@@ -321,9 +333,6 @@ class Twister extends Particle
   
   void display()
   {
-    //fill(255, map(lifespan, 0, 400, 0, 255));
-    //ellipse(pos.x, pos.y, size, size);
-    
     fill(c, map(lifespan, 0, 400, 0, 255));
     
     pushMatrix();
@@ -333,15 +342,6 @@ class Twister extends Particle
     ellipse(5, 5, size, size);
     ellipse(-5, -5, size, size);
     popMatrix();
-  }
-}
-
-class Lines extends Particle
-{
-  // Draw lines to other line particles
-  public Lines(PVector p)
-  {
-    super(p);
   }
 }
 
@@ -459,18 +459,6 @@ void MixedEmission(PVector pos)
        system.floaters.add(f);
        //continue;
      } 
-     
-     //chance = random(0, 1);
-     //if (chance <= 0.50) {
-     //  Faller fa = new Faller(pos);
-     //  system.fallers.add(fa);
-     //  fa.c = color(random(75, 230), 0, random(130, 250));
-     //  continue;
-     //} else {
-     //  Twister t = new Twister(pos);
-     //  system.twisters.add(t);
-     //  continue;
-     //}
    }
 }
 
@@ -517,11 +505,14 @@ void CompleteEmission(PVector pos)
   int base_blue = (int) random(0, 255);
   
   for (int x = 0; x < particles; x++) {
-    Sparkler s =new Sparkler(pos, base_red, base_green, base_blue);
-    s.c = color(base_red, base_green, base_blue);
-    system.sparklers.add(s);
     
-    int count = (int) random(1, 5);
+    Trailer tr = new Trailer(pos);
+    // switched to amplify
+    //tr.c = color(base_red, base_green, base_blue);
+    tr.c = color(amplify(base_red), amplify(base_green), amplify(base_blue));
+    system.trailers.add(tr);
+    
+    int count = (int) random(1, 6);
     switch(count)
     {
       case 1:
@@ -531,7 +522,6 @@ void CompleteEmission(PVector pos)
       case 2:
         Twister t = new Twister(pos);
         t.c = color(base_red + (int) random(0, 25), base_green + (int) random(0, 25), base_blue);
-        //color((int) random(0, 255), base_green + (int) random(0, 25), base_blue);
         system.twisters.add(t);
         break;
       case 3:
@@ -544,9 +534,12 @@ void CompleteEmission(PVector pos)
       case 4:
         Floater fl = new Floater(pos);
         fl.c = color(base_blue, base_red + (int) random(0, 25), base_green + (int) random(0, 25));
-        //color((int) random(0, 255), base_blue, base_green + (int) random(0, 25));
         system.floaters.add(fl);
         break;
+      case 5:
+        Sparkler s = new Sparkler(pos, base_red, base_green, base_blue);
+        s.c = color(base_red, base_blue, base_green);
+        system.sparklers.add(s);
     }
   }
 }

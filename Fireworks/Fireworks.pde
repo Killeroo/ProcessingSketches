@@ -38,8 +38,6 @@ void draw()
 
 class ParticleSystem
 {
-  // Privatise
-  
   ArrayList<Particle> particles = new ArrayList<Particle>();
   
   // All sub particles
@@ -48,14 +46,12 @@ class ParticleSystem
   ArrayList<Faller> fallers = new ArrayList<Faller>();
   ArrayList<Twister> twisters = new ArrayList<Twister>();
   ArrayList<Sparkler> sparklers = new ArrayList<Sparkler>();
-  
   ArrayList<Trailer> trailers = new ArrayList<Trailer>();
-  
   
   void add(Particle p) // Change this, or add endpoints for subparticles?
   {
     // Apply some initial upward force
-    p.applyForce(new PVector(0, random(-7, -25)));
+    p.applyForce(new PVector(0, random(-10, -30)));
     particles.add(p);  
   }
   
@@ -176,21 +172,11 @@ class ParticleSystem
       
       if (s.lifespan < 225) {
         
-        s.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
-        s.vel.limit(0.5); //1 //0.05);
-        
-        if (s.vel.y > 0) {
-          //s.sparkle();
-        } else {
-          //s.display();
-        }
-      } else {
-        //s.display();
+        s.applyForce(new PVector(0, 0.025));
+        s.vel.limit(0.5);
       }
       
       s.sparkle();
-      
-      
       s.move();
       
       if (s.isDead()) {
@@ -210,10 +196,11 @@ class ParticleSystem
       
       if (t.lifespan < 175) {
         
-        t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
-        t.vel.limit(0.5); //1 //0.05);
+        //t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
+        //t.vel.limit(0.5); //1 //0.05);
       } 
       
+      t.applyForce(new PVector(0, 0.005));
       t.move();
       
       if (t.isDead()) {
@@ -307,7 +294,7 @@ class Trailer extends Particle
     
     this.lifespan = 255;
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(1,7)));
+    this.applyForce(PVector.random2D().limit(random(0.1,7)));
   }
 }
 

@@ -102,7 +102,7 @@ class ParticleSystem
       Randomer r = i.next();
       
       r.applyForce(PVector.random2D());
-      r.vel.limit(2); // TODO: Move limited amount to class
+      r.vel.limit(r.limit); // TODO: Move limited amount to class
       r.move();
       
       if (r.isDead()) {
@@ -214,6 +214,7 @@ class ParticleSystem
 
 class Randomer extends Particle
 {
+  int limit = 2;
   public Randomer(PVector p)
   {
     super(p);  
@@ -331,7 +332,7 @@ class Twister extends Particle
     popMatrix();
   }
 }
-
+int i = 0;
 class Particle
 {
   PVector vel = new PVector(0, 0);
@@ -386,11 +387,27 @@ class Particle
       //SprawlingEmission(pos);
       //MixedEmission(pos);  
     }
-    CompleteEmission(pos);
     
-    //FallerEmission(pos);
-    //MixedEmission(pos);
-    //FullEmission(pos);
+    switch(i)
+    {
+      case 0:
+      CompleteEmission(pos);
+      break;
+      case 1:
+      FullEmission(pos);
+      break;
+      case 2:
+      MixedEmission(pos);
+      break;
+      case 3:
+      SprawlingEmission(pos);
+      break;
+      case 4:
+      RainbowEmission(pos);
+      i = -1;
+    }
+    i++;
+    
     exploded = true;
   }
   
@@ -458,6 +475,8 @@ void SprawlingEmission(PVector pos)
  
   for (int x = 0; x < particles; x++) {
     Randomer r = new Randomer(pos);
+    r.limit = 4;
+    r.lifespan = 300;
     int new_r = red + (int) random(0, 100);
     int new_g = green + (int) random(0, 100);
     int new_b = blue + (int) random(0, 100);
@@ -467,7 +486,7 @@ void SprawlingEmission(PVector pos)
 }
 
 // Spawn just fallers
-void FallerEmission(PVector pos)
+void RainbowEmission(PVector pos)
 {
   int particles = (int) random(250, 450);
   

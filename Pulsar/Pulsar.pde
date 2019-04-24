@@ -21,7 +21,7 @@ void draw()
   
   if (millis() > interval) {
        interval = millis() + 1000;//(int) random(750, 1500);
-       PVector target = new PVector(width/2, height/2);//new PVector(random(width), random(height));
+       PVector target = new PVector((width/2)+random(-2.5,2.5), (height/2)+random(-2.5,2.5));//new PVector(random(width), random(height));
        
          for (int i = 0; i < particles.size(); i++) {
             Particle p = (Particle) particles.get(i);
@@ -77,13 +77,13 @@ class Particle
   {
     PVector d = PVector.sub(forceLoc, pos);
     d.normalize();
-    d.mult(16); //9
+    d.mult(9); //9
     acc = d;
   }
   
   public void display()
   {
-    stroke(255, map(vel.mag(), 0, 20, 25, 150), map(vel.mag(), 0, 20, 50, 255), map(vel.mag(), 0, 20, 50, 200));
+    stroke(255, map(vel.mag(), 0, 20, 25, 150), map(vel.mag(), 0, 20, 50, 255), map(vel.mag(), 0, 20, 150, 200));
     point(pos.x, pos.y);
   }
   

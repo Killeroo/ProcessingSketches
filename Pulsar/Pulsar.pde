@@ -1,5 +1,4 @@
 ArrayList particles = new ArrayList();
-Wanderer thing = new Wanderer();
 
 void setup()
 {
@@ -12,12 +11,10 @@ int interval = 0;
 //https://www.openprocessing.org/sketch/180734
 void draw()
 {
-  background(0);
-  //  noStroke();
-  //fill(0, 25); //50
-  //rect(0, 0, width, height);
-  
-  thing.update();
+  //background(0);
+    noStroke();
+  fill(0, 75); //50
+  rect(0, 0, width, height);
   
   if (millis() > interval) {
        interval = millis() + 1000;//(int) random(750, 1500);
@@ -37,15 +34,6 @@ void draw()
     p.display();
   }
   
-  
-}
-void mousePressed()
-{
-
-}
-class ParticleSystem
-{
-    
   
 }
 
@@ -68,16 +56,13 @@ class Particle
     pos.add(vel); // Apply our speed vector
     acc.mult(0);
     vel.mult(0.97);
-    
-    // Decrease particle lifespan
-    //lifespan--;
   }
   
   public void applyForce(PVector forceLoc) 
   {
     PVector d = PVector.sub(forceLoc, pos);
     d.normalize();
-    d.mult(9); //9
+    d.mult(9);
     acc = d;
   }
   
@@ -85,88 +70,5 @@ class Particle
   {
     stroke(255, map(vel.mag(), 0, 20, 25, 150), map(vel.mag(), 0, 20, 50, 255), map(vel.mag(), 0, 20, 150, 200));
     point(pos.x, pos.y);
-  }
-  
-  public boolean isDead()
-  {
-    if (lifespan < 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
-
-class Wanderer 
-{
-  PVector loc;
-  PVector target;
-  int interval;
-  
-  // Rotating internals
-  float angle;
-  float theta;
-  float theta2;
-  
-  Wanderer() 
-  {
-    loc = new PVector(width/2, height/2);
-    target = new PVector(random(width), random(height));
-    interval = millis() + (int) random(750, 1500);
-  }
-  
-  void update()
-  {
-     if (millis() > interval) {
-       interval = millis() + (int) random(750, 1500);
-       target = new PVector(random(width), random(height));
-       
-         for (int i = 0; i < particles.size(); i++) {
-            //Particle p = (Particle) particles.get(i);
-            //p.applyForce(target);
-          }
-     } 
-     
-     loc.x = lerp(loc.x, target.x, 0.025);
-     loc.y = lerp(loc.y, target.y, 0.025);
-  }
-
-  void display() 
-  {
-    stroke(constrain(loc.dist(target), 0, 255),0, 0);
-    
-    //constrain(loc.dist(target), 0, 255);
-    
-    noFill();
-    
-    pushMatrix();
-    translate(loc.x, loc.y);
-    rotate(theta);
-    theta += TWO_PI/500;
-    
-    rect(0, 0, 100, 100);
-    
-    
-    rect(50, 50, 100, 100);
-    
-    rect(100, 100, 100, 100);
-    
-    rect(100, 0, 100, 100);
-    rect(0, 100, 100, 100);
-    
-    for (int x = 0; x < 10; x++) {
-      //ellipse(0, 0, 30, 30);  
-    }
-    
-    rect(-50, -50, 100, 100);
-    
-    rect(-100, -100, 100, 100);
-    
-    rect(-100, 0, 100, 100);
-    
-    rect(0, -100, 100, 100);
-    
-    popMatrix();
-    
   }
 }

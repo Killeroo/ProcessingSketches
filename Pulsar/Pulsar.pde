@@ -62,7 +62,7 @@ class Particle
   {
     PVector d = PVector.sub(forceLoc, pos);
     d.normalize();
-    d.mult(9);
+    d.mult(12);
     acc = d;
   }
   int c = 50;
@@ -71,9 +71,9 @@ class Particle
   {
     stroke( 
       c,
-      map(vel.mag(), 0, 20, 25, 150), 
-      map(vel.mag(), 0, 20, 50, 255), 
-      255//map(vel.mag(), 0, 20, 150, 200)
+      map(vel.mag(), 0, 20, 50, 250), 
+      map(pos.mag(), 0, width, 0, 255), //map(vel.mag(), 0, 20, 50, 255),
+      map(vel.mag(), 0, 20, 150, 200)
     );
     
     if (c == 255) {

@@ -65,10 +65,29 @@ class Particle
     d.mult(9);
     acc = d;
   }
-  
+  int c = 50;
+  boolean desc = false;
   public void display()
   {
-    stroke(255, map(vel.mag(), 0, 20, 25, 150), map(vel.mag(), 0, 20, 50, 255), map(vel.mag(), 0, 20, 150, 200));
+    stroke( 
+      c,
+      map(vel.mag(), 0, 20, 25, 150), 
+      map(vel.mag(), 0, 20, 50, 255), 
+      255//map(vel.mag(), 0, 20, 150, 200)
+    );
+    
+    if (c == 255) {
+      desc = true;  
+    } else if (c == 50) {
+      desc = false;  
+    }
+    
+    if (desc) {
+      c--;  
+    } else {
+      c++;  
+    }
+      
     point(pos.x, pos.y);
   }
 }

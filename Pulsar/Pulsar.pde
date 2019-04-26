@@ -23,14 +23,14 @@ void draw()
    
        for (int i = 0; i < particles.size(); i++) {
           Particle p = (Particle) particles.get(i);
-          p.applyForce(target, 1.5);
+          //p.applyForce(target, 1.5);
         }
           
           contracting = !contracting;
      }
   
   if (contracting) {
-    PVector target = new PVector((width/2)+random(-2.5,2.5), (height/2)+random(-2.5,2.5));
+    PVector target = new PVector((width/2)+random(-22.5,22.5), (height/2)+random(-22.5,22.5));
     for (int i = 0; i < particles.size(); i++) {
       Particle p = (Particle) particles.get(i);
       p.applyForce(target, 0.9);

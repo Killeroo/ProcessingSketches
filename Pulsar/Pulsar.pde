@@ -18,7 +18,7 @@ void draw()
   rect(0, 0, width, height);
   
   if (millis() > interval) {
-       interval = millis() + 1000;//(int) random(750, 1500);
+       interval = millis() + 1500;//(int) random(750, 1500);
        PVector target = new PVector(random(0, width), random(0, height));//new PVector(random(width), random(height));
    
        for (int i = 0; i < particles.size(); i++) {
@@ -83,10 +83,10 @@ class Particle
   public void display()
   {
     stroke( 
-      c,
-      map(vel.mag(), 0, 20, 50, 250), 
-      map(pos.mag(), 0, width, 0, 255), //map(vel.mag(), 0, 20, 50, 255),
-      map(vel.mag(), 0, 20, 150, 200)
+      map(vel.mag(), 0, 20, 50, 250),//200,
+      25,//map(vel.mag(), 0, 20, 50, 250), 
+      map(pos.mag(), 0, width, 25, 75), //map(vel.mag(), 0, 20, 50, 255),
+      225//map(vel.mag(), 0, 20, 50, 250)
     );
     
     if (c == 255) {

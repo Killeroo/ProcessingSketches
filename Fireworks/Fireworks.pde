@@ -2,14 +2,14 @@ import java.util.Iterator;
 
 final float GRAVITY = 0.03; //0.05
 
-// More vairation in movement
-//sub sub explosions
+// Always write production code
+// Vary numbers 
+// Randomise speed and gravity particle properties when creating a new emission
+
+// Particles that explode into more particles, use floater code
+// egyptian lines
 // triangles
 // Add octopus wandering
-// Add more variation to emittion patterns
-// Add multicolored ones
-
-// redo names and/or add description to each class
 
 ParticleSystem system = new ParticleSystem();
 int interval = 0;

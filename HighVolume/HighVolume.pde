@@ -1,6 +1,8 @@
-PVector[] pos = new PVector[10000];
-PVector[] acc = new PVector[10000];
-PVector[] vel = new PVector[10000];
+final int PARTICLE_COUNT = 10000;
+
+PVector[] pos = new PVector[PARTICLE_COUNT];
+PVector[] acc = new PVector[PARTICLE_COUNT];
+PVector[] vel = new PVector[PARTICLE_COUNT];
 
 // The trick is store structures of arrays as opposed to arrays of structures.
 
@@ -16,23 +18,29 @@ PVector[] vel = new PVector[10000];
 // Vectorisation
 // Parrellisation
 
+PVector center;
+
 void setup()
 {
   size(1000,1000);
   //fullScreen();
+  background(0);
   
-  for (int x = 0; x < 10000; x++) {
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x] = new PVector(random(0, width), random(0, height));
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
     acc[x] = new PVector(0, 0);
   }
   
+  center = new PVector(width/2, height/2);
+  
   fill(255);
+  noStroke();
 }
 
 void draw()
 {
-  //background(255);
+  //background(0);
   noStroke();
   fill(0, 20);
   rect(0, 0, width, height);
@@ -40,20 +48,40 @@ void draw()
   // Act on each array seperately as well, otherwise you are still mixing and matching
   // the arrays that are in different parts of memory
   
-  for (int x = 0; x < 10000; x++) {
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
     vel[x].add(acc[x]);
   }
   
-  for (int x = 0; x < 10000; x++) {
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x].add(vel[x]);
+    
+    // Bounds check
+    if (pos[x].x < 0) pos[x].x = 1000;
+    if (pos[x].x > 1000) pos[x].x = 0;
+    if (pos[x].y < 0) pos[x].y = 1000;
+    if (pos[x].y > 1000) pos[x].y = 0;
   }
   
-  for (int x = 0; x < 10000; x++) {
-    acc[x].mult(0);
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
+    PVector f = PVector.sub(center, pos[x]); // accessing pos here, bad!
+    f.normalize();
+    f.mult(0.01);
+    acc[x] = f;
+    
+    //acc[x].mult(0);
   }
   
   fill(255);
-  for (int x = 0; x < 10000; x++) {
+  //stroke(255);
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
+    if (x % 2 == 0)
+      fill(255, 0, 0);
+    else
+      fill(255);
+    
     ellipse(pos[x].x, pos[x].y, 2, 2);
+    //point(pos[x].x, pos[x].y);
   }
+  
+  println("fps: " + frameRate);
 }

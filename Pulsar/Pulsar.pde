@@ -82,7 +82,7 @@ class Particle
   boolean desc = false;
   public void display()
   {
-    stroke( 
+    fill( 
       map(vel.mag(), 0, 20, 50, 250),//200,
       25,//map(vel.mag(), 0, 20, 50, 250), 
       map(pos.mag(), 0, width, 25, 75), //map(vel.mag(), 0, 20, 50, 255),
@@ -101,6 +101,6 @@ class Particle
       c++;  
     }
       
-    point(pos.x, pos.y);
+    ellipse(pos.x, pos.y, 2, 2);
   }
 }

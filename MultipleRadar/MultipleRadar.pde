@@ -1,15 +1,10 @@
-/////////////////////////////////////////////////////////////////////////////////////
-///                                  Choasphere                                    ///
-/////////////////////////////////////////////////////////////////////////////////////
-///                                                                               ///
-/// Written by Matthew Carney (1st Aug 2019)                                      ///
-///     [matthewcarney64@gmail.com] [https://github.com/Killeroo]                 ///
-/////////////////////////////////////////////////////////////////////////////////////
 
-final int ORBIT_COUNT = 1000;
+
+final int ORBIT_COUNT = 500;
+final int ARMS = 20;
 
 int[] orbits_x = new int[ORBIT_COUNT];
-int[] arms = new int[12];
+int[] arms = new int[ARMS];
 
 void setup()
 {
@@ -24,7 +19,7 @@ void setup()
   x = 125;
   y = 200;
   
-  for (int x = 0; x < 12; x++) {
+  for (int x = 0; x < ARMS; x++) {
     arms[x] = (int) random(360);  
   }
 }
@@ -42,7 +37,7 @@ void draw()
   
   // Cap the angles at 360 degrees, if over reset back to 0
   
-  for (int x = 0; x < 12; x++) {
+  for (int x = 0; x < ARMS; x++) {
     int value = arms[x];
     if (value < 360) {
       value++;  
@@ -61,7 +56,7 @@ void draw()
       //fill (random(255), random(255), random(255));
   for (int c = 0; c < ORBIT_COUNT; c++) {
     
-    for (int y = 0; y < 12; y++) {
+    for (int y = 0; y < ARMS; y++) {
       fill(255, 0, 0);
       
       ellipse(sin(radians(arms[y])) * orbits_x[c], cos(radians(arms[y])) * orbits_x[c], 4, 4);

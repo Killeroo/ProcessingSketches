@@ -1,7 +1,7 @@
 final int PARTICLE_COUNT = 10000;
 
 PVector[] pos = new PVector[PARTICLE_COUNT];
-PVector[] acc = new PVector[PARTICLE_COUNT];
+PVector[] acc = new PVector[PARTICLE_COUNT]; // Remove this, we don't use it here
 PVector[] vel = new PVector[PARTICLE_COUNT];
 
 // The trick is store structures of arrays as opposed to arrays of structures.
@@ -53,7 +53,7 @@ void draw()
   }
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
-    pos[x].add(vel[x]);
+    pos[x].add(vel[x]); // accessing vel here, bad!
     
     // Bounds check
     if (pos[x].x < 0) pos[x].x = 1000;

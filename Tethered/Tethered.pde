@@ -1,4 +1,4 @@
-final int COUNT = 5;
+final int COUNT = 7;
 
 // The particle properties don't _need_ to be unfolded like this
 PVector[] points = new PVector[COUNT];

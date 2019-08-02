@@ -1,6 +1,7 @@
 final int PARTICLE_COUNT = 10000;
 
 PVector[] pos = new PVector[PARTICLE_COUNT];
+PVector[] acc = new PVector[PARTICLE_COUNT]; // Remove this, we don't use it here
 PVector[] vel = new PVector[PARTICLE_COUNT];
 
 // The trick is store structures of arrays as opposed to arrays of structures.
@@ -28,6 +29,7 @@ void setup()
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x] = new PVector(random(0, width), random(0, height));
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
+    acc[x] = new PVector(0, 0);
   }
   
   center = new PVector(width/2, height/2);
@@ -45,7 +47,10 @@ void draw()
   
   // Act on each array seperately as well, otherwise you are still mixing and matching
   // the arrays that are in different parts of memory
- 
+  
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
+    vel[x].add(acc[x]);
+  }
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x].add(vel[x]); // accessing vel here, bad!
@@ -57,12 +62,20 @@ void draw()
     if (pos[x].y > 1000) pos[x].y = 0;
   }
   
+  for (int x = 0; x < PARTICLE_COUNT; x++) {
+    PVector f = PVector.sub(center, pos[x]); // accessing pos here, bad!
+    f.normalize();
+    f.mult(0.01);
+    acc[x] = f;
+    
+    //acc[x].mult(0);
+  }
   
   fill(255);
   //stroke(255);
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     if (x % 2 == 0)
-      fill(255, 0, 0);
+      fill(255, 150, 0);
     else
       fill(255);
     

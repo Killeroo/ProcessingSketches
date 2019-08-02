@@ -2,16 +2,16 @@ final int COUNT = 5;
 
 // The particle properties don't _need_ to be unfolded like this
 PVector[] points = new PVector[COUNT];
-PVector[] vel = new PVector[COUNT];
+PVector[] velocities = new PVector[COUNT];
 
 void setup()
 {
-  size(1000, 1000);
+  size(500, 500);
   background(255);
   
   for (int i = 0; i < COUNT; i++) {
     points[i] = new PVector(random(width), random(height));  
-    vel[i] = new PVector(random(-1, 1), random(-1, 1));
+    velocities[i] = new PVector(random(-0.75, 0.75), random(-0.75, 0.75));
   }
 }
 
@@ -20,17 +20,17 @@ void draw()
   background(255);
   
   for (int x = 0; x < COUNT; x++) {
-    vel[x].add(new PVector(0, 0));
+    velocities[x].add(new PVector(0, 0));
   }
   
   for (int x = 0; x < COUNT; x++) {
-    points[x].add(vel[x]);
+    points[x].add(velocities[x]);
     
     // 'Bounce' off walls
-    if (points[x].x < 0) vel[x].x *= -1;
-    if (points[x].x > width)vel[x].x *= -1;
-    if (points[x].y < 0) vel[x].y *= -1;
-    if (points[x].y > height) vel[x].y *= -1;
+    if (points[x].x < 0) velocities[x].x *= -1;
+    if (points[x].x > width)velocities[x].x *= -1;
+    if (points[x].y < 0) velocities[x].y *= -1;
+    if (points[x].y > height) velocities[x].y *= -1;
   }
   
   PVector start = null;

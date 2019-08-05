@@ -1,15 +1,35 @@
 import java.util.Iterator;
 
 final float GRAVITY = 0.03; //0.05
-
-// Always write production code
-// Vary numbers 
-// Randomise speed and gravity particle properties when creating a new emission
-
 // Particles that explode into more particles, use floater code
 // egyptian lines
 // triangles
 // Add octopus wandering
+
+// TODO:
+// -------
+// Must:
+// -> Dynamic Emission Generation
+//    +> Rip out generic Emissions
+//    +> Keep some full Emissions
+// -> Add functions to generate colour relations of base colours
+//    +> Find out how the colour wheels do it
+// -> Clean the code
+//    +> Add comments and seperators
+//    +> Rename particles (sparkler -> SparklerParticle)
+//    +> Add explanation to what each particle does
+//    +> Cleanup base particle class
+
+// Should:
+// -> Can you clean up the ParticleSystem updaters?
+// -> Randomised particle gravity
+// -> Stop initial upward force being default behaviour
+
+// Nice to have:
+// -> New particles:
+//    +> Octopus wandering
+//    +> Explosions within explosions
+// -> Make the explosion code less hacky
 
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
@@ -35,9 +55,12 @@ void draw()
   }
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////
+// Particle system; controls, displays and updates every particle in the sketch
+// (we do implement some specific behaviours for some particle types here so watch out)
 class ParticleSystem
 {
+  // Initial particles
   ArrayList<Particle> particles = new ArrayList<Particle>();
   
   // All sub particles
@@ -57,8 +80,8 @@ class ParticleSystem
   
   void update()
   {  
-    this.updateParticles();
-    
+    // Update every particle in existence
+    this.updateBaseParticles();
     this.updateRandomers();
     this.updateFloaters();
     this.updateFallers();
@@ -67,9 +90,11 @@ class ParticleSystem
     this.updateTrailers();
   }
   
-  // TODO: Rename
-  void updateParticles()
+  // Most update functions 
+  void updateBaseParticles()
   {
+    // We use an interator so we can modify the contents of the list as we
+    // go through it
     Iterator<Particle> i = particles.iterator();
     while (i.hasNext()) {
       Particle p = i.next();
@@ -102,7 +127,7 @@ class ParticleSystem
       Randomer r = i.next();
       
       r.applyForce(PVector.random2D());
-      r.vel.limit(r.limit); // TODO: Move limited amount to class
+      r.vel.limit(r.limit); 
       r.move();
       
       if (r.isDead()) {
@@ -212,9 +237,107 @@ class ParticleSystem
   }
 }
 
+int i = 0;
+class Particle
+{
+  PVector vel = new PVector(0, 0);
+  PVector acc = new PVector(0, 0);
+  PVector pos;
+  
+  float size = 2;
+  float mass = random(2, 2.5); // TODO: this works i suppose?
+  color c;
+  int lifespan = 400;
+  
+  boolean subParticle = false;
+  boolean exploded = false;
+  
+  Particle(PVector p)
+  {
+    pos = new PVector (p.x, p.y);
+    acc = new PVector (random(-0.1, 0.1), 0);
+    c = color(255, 255, 255);
+  }
+  
+  public void move()
+  {
+    vel.add(acc); // Apply acceleration
+    pos.add(vel); // Apply our speed vector
+    acc.mult(0);
+    
+    // TODO: Get rid of exploded, HACKS
+    if (vel.y > 0 && !exploded && !subParticle) { 
+      explode();
+    }
+    
+    // Decrease particle lifespan
+    lifespan--;
+  }
+  
+  public void applyForce(PVector force) 
+  {
+    PVector f = PVector.div(force, mass);
+    acc.add(f);
+  }
+  
+  public void explode()
+  {
+    
+    float chance = random(0, 1);
+    if (chance <= 0.25) {
+      //FullEmission(pos);
+    } else if ( chance <= 0.5) {
+      //FallerEmission(pos); 
+    } else { 
+      //SprawlingEmission(pos);
+      //MixedEmission(pos);  
+    }
+    /*
+    switch(i)
+    {
+      case 0:
+      CompleteEmission(pos);
+      break;
+      case 1:
+      FullEmission(pos);
+      break;
+      case 2:
+      MixedEmission(pos);
+      break;
+      case 3:
+      SprawlingEmission(pos);
+      break;
+      case 4:
+      RainbowEmission(pos);
+      i = -1;
+    }
+    */
+    i++;
+    
+    GenerateDynamicEmission(pos);
+    
+    exploded = true;
+  }
+  
+  public void display()
+  {
+    fill(c, map(lifespan, 0, 400, 0, 255));
+    ellipse(pos.x, pos.y, size, size);
+  }
+  
+  public boolean isDead()
+  {
+    if (lifespan < 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
 class Randomer extends Particle
 {
-  int limit = 2;
+  int limit = 1;
   public Randomer(PVector p)
   {
     super(p);  
@@ -330,100 +453,6 @@ class Twister extends Particle
     ellipse(5, 5, size, size);
     ellipse(-5, -5, size, size);
     popMatrix();
-  }
-}
-int i = 0;
-class Particle
-{
-  PVector vel = new PVector(0, 0);
-  PVector acc = new PVector(0, 0);
-  PVector pos;
-  
-  float size = 2;
-  float mass = random(2, 2.5); // TODO: this works i suppose?
-  color c;
-  int lifespan = 400;
-  
-  boolean subParticle = false;
-  boolean exploded = false;
-  
-  Particle(PVector p)
-  {
-    pos = new PVector (p.x, p.y);
-    acc = new PVector (random(-0.1, 0.1), 0);
-    c = color(255, 255, 255);
-  }
-  
-  public void move()
-  {
-    vel.add(acc); // Apply acceleration
-    pos.add(vel); // Apply our speed vector
-    acc.mult(0);
-    
-    // TODO: Get rid of exploded, HACKS
-    if (vel.y > 0 && !exploded && !subParticle) { 
-      explode();
-    }
-    
-    // Decrease particle lifespan
-    lifespan--;
-  }
-  
-  public void applyForce(PVector force) 
-  {
-    PVector f = PVector.div(force, mass);
-    acc.add(f);
-  }
-  
-  public void explode()
-  {
-    
-    float chance = random(0, 1);
-    if (chance <= 0.25) {
-      //FullEmission(pos);
-    } else if ( chance <= 0.5) {
-      //FallerEmission(pos); 
-    } else { 
-      //SprawlingEmission(pos);
-      //MixedEmission(pos);  
-    }
-    
-    switch(i)
-    {
-      case 0:
-      CompleteEmission(pos);
-      break;
-      case 1:
-      FullEmission(pos);
-      break;
-      case 2:
-      MixedEmission(pos);
-      break;
-      case 3:
-      SprawlingEmission(pos);
-      break;
-      case 4:
-      RainbowEmission(pos);
-      i = -1;
-    }
-    i++;
-    
-    exploded = true;
-  }
-  
-  public void display()
-  {
-    fill(c, map(lifespan, 0, 400, 0, 255));
-    ellipse(pos.x, pos.y, size, size);
-  }
-  
-  public boolean isDead()
-  {
-    if (lifespan < 0) {
-      return true;
-    } else {
-      return false;
-    }
   }
 }
 
@@ -546,6 +575,70 @@ void CompleteEmission(PVector pos)
         Sparkler s = new Sparkler(pos, base_red, base_green, base_blue);
         s.c = color(base_red, base_blue, base_green);
         system.sparklers.add(s);
+    }
+  }
+}
+
+void GenerateDynamicEmission(PVector pos)
+{
+  int iterations = (int) random(2, 6);
+  int base_red = (int) random(0, 255);
+  int base_green = (int) random(0, 255);
+  int base_blue = (int) random(0, 255);
+  
+  for (int x = 0; x < iterations; x++) {
+    int choice = (int) random(1, 6);
+    int particleCount = 0;
+    
+    switch(choice) {
+      case 1: 
+        particleCount = (int) random(50, 150);
+        for (int i = 0; i < particleCount; i++) {
+          Randomer r = new Randomer(pos);
+          r.c = color(base_red + random(-20, 20), base_blue + random(-20, 20), base_green + random(-20, 20));
+          system.randomers.add(r);
+        }
+        break;
+      case 2:
+        particleCount = (int) random(25, 175);
+        for (int i = 0; i < particleCount; i++) {
+          Floater fl = new Floater(pos);
+          fl.c = color(base_blue, base_red + (int) random(-25, 25), base_green + (int) random(-25, 25));
+          system.floaters.add(fl);
+        }
+        break;
+      case 3:
+        particleCount = (int) random(50, 150);
+        for (int i = 0; i < particleCount; i++) {
+          Faller f = new Faller(pos);
+          f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
+          system.fallers.add(f);
+        }
+        break;
+      case 4:
+        particleCount = (int) random(10, 100);
+        for (int i = 0; i < particleCount; i++) {
+          Twister t = new Twister(pos);
+          t.c = color(base_red + (int) random(-50, 50), base_green + (int) random(-50, 50), base_blue);
+          system.twisters.add(t);
+        }
+        break;
+      case 5:
+        particleCount = (int) random(50, 150);
+        for (int i = 0; i < particleCount; i++) {
+          Sparkler s = new Sparkler(pos, base_red, base_green, base_blue);
+          s.c = color(amplify(base_red), amplify(base_blue), amplify(base_green));
+          system.sparklers.add(s);
+        }
+        break;
+      case 6:
+        particleCount = (int) random(50, 150);
+        for (int i = 0; i < particleCount; i++) {
+          Trailer t = new Trailer(pos);
+          t.c = color(amplify(base_red), amplify(base_blue), amplify(base_green));
+          system.trailers.add(t);
+        }
+        break;
     }
   }
 }

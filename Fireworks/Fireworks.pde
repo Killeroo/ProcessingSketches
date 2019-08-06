@@ -14,9 +14,9 @@ final float GRAVITY = 0.03; //0.05
 //    +> Find out how the colour wheels do it
 // -> Clean the code
 //    +> Add comments and seperators (IN-PROGRESS)
-//    +> Rename particles (sparkler -> SparklerParticle)
-//    +> Add explanation to what each particle does
-//    +> Cleanup base particle class
+//    +> Rename particles (SparklingParticle -> SparklingParticleParticle)
+//    +> Add explanation to what each particle does (IN-PROGRESS)
+//    +> Cleanup base particle class (DONE)
 
 // Should:
 // -> Capitalise function and public variable names 
@@ -75,22 +75,22 @@ class ParticleSystem
   
   // All sub particles
   ArrayList<RandomMovementParticle> RandomMovementParticles = new ArrayList<RandomMovementParticle>();
-  ArrayList<Floater> floaters = new ArrayList<Floater>();
-  ArrayList<Faller> fallers = new ArrayList<Faller>();
-  ArrayList<Twister> twisters = new ArrayList<Twister>();
-  ArrayList<Sparkler> sparklers = new ArrayList<Sparkler>();
-  ArrayList<Trailer> trailers = new ArrayList<Trailer>();
+  ArrayList<FloatingParticle> FloatingParticles = new ArrayList<FloatingParticle>();
+  ArrayList<FallingParticle> FallingParticles = new ArrayList<FallingParticle>();
+  ArrayList<TwistingParticle> TwistingParticles = new ArrayList<TwistingParticle>();
+  ArrayList<SparklingParticle> SparklingParticles = new ArrayList<SparklingParticle>();
+  ArrayList<TrailingParticle> TrailingParticles = new ArrayList<TrailingParticle>();
   
   void update()
   {  
     // Update every particle in existence
     this.updateBaseParticles();
     this.updateRandomMovementParticles();
-    this.updateFloaters();
-    this.updateFallers();
-    this.updateTwisters();
-    this.updateSparklers();
-    this.updateTrailers();
+    this.updateFloatingParticles();
+    this.updateFallingParticles();
+    this.updateTwistingParticles();
+    this.updateSparklingParticles();
+    this.updateTrailingParticles();
   }
   
   // Most update functions 
@@ -141,11 +141,11 @@ class ParticleSystem
     }
   }
   
-  void updateFloaters()
+  void updateFloatingParticles()
   {
-    Iterator<Floater> i = floaters.iterator();
+    Iterator<FloatingParticle> i = FloatingParticles.iterator();
     while (i.hasNext()) {
-      Floater f = i.next();
+      FloatingParticle f = i.next();
       
       f.vel.limit(f.limit);
       f.move();
@@ -158,11 +158,11 @@ class ParticleSystem
     }
   }
   
-  void updateFallers()
+  void updateFallingParticles()
   {
-    Iterator<Faller> i = fallers.iterator();
+    Iterator<FallingParticle> i = FallingParticles.iterator();
     while (i.hasNext()) {
-      Faller f = i.next();
+      FallingParticle f = i.next();
       
       f.applyForce(new PVector(0, GRAVITY));
       f.move();
@@ -175,11 +175,11 @@ class ParticleSystem
     }
   }
   
-  void updateTwisters()
+  void updateTwistingParticles()
   {
-    Iterator<Twister> i = twisters.iterator();
+    Iterator<TwistingParticle> i = TwistingParticles.iterator();
     while (i.hasNext()) {
-      Twister t = i.next();
+      TwistingParticle t = i.next();
       
       t.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
       t.move();
@@ -192,11 +192,11 @@ class ParticleSystem
     }
   }
   
-  void updateSparklers()
+  void updateSparklingParticles()
   {
-    Iterator<Sparkler> i = sparklers.iterator();
+    Iterator<SparklingParticle> i = SparklingParticles.iterator();
     while (i.hasNext()) {
-      Sparkler s = i.next();
+      SparklingParticle s = i.next();
       
       if (s.lifespan < 225) {
         
@@ -216,11 +216,11 @@ class ParticleSystem
     
   }
   
-  void updateTrailers()
+  void updateTrailingParticles()
   {
-    Iterator<Trailer> i = trailers.iterator();
+    Iterator<TrailingParticle> i = TrailingParticles.iterator();
     while (i.hasNext()) {
-      Trailer t = i.next();
+      TrailingParticle t = i.next();
       
       if (t.lifespan < 175) {
         
@@ -249,18 +249,19 @@ class Particle
   PVector pos;                       // Position
   PVector vel = new PVector(0, 0);   // Velocity
   PVector acc = new PVector(0, 0);   // Acceleration
-  float mass = random(2, 2.5);       // Weight (This adds more variance 
+  float mass = random(2, 2.5);       // Weight (This adds more variance to movement)
 
-  float size = 2;                    // Draw size of ellipse
+  float size = 2;                    // Draw size of particle
   color c;                           // Color
   int lifespan = 400;                // Particle lifespan, decremented every update, particle destroyed when 0
   
-  boolean exploded = false;          // This flag stops the firework from exploding again
-  boolean subParticle = false;       ///
+  boolean exploded = false;          // This flag stops the firework from exploding multiple times
+  boolean subParticle = false;       // This flag is used by all derived particle types, it stops them from
+                                     // from exploding the way the initial particle/firework does
   
   Particle(PVector p)
   {
-    pos = new PVector (p.x, p.y);
+    pos = new PVector (p.x, p.y); 
     acc = new PVector (random(-0.1, 0.1), 0);
     c = color(255, 255, 255);
   }
@@ -268,10 +269,13 @@ class Particle
   public void move()
   {
     vel.add(acc); // Apply acceleration
-    pos.add(vel); // Apply our speed vector
+    pos.add(vel); // Apply our speed vector to our position 
     acc.mult(0);
     
-    // TODO: Get rid of exploded, HACKS
+    // We only 'explode' (spawn a firework explosion) when the following conditions are met:
+    // 1) When the particle starts falling (vel.y/upwards velocity is below 0)
+    // 2) When we haven't exploded already
+    // 3) When we are not a derived particle/firework type (we don't want continous explosions for other particle effects)
     if (vel.y > 0 && !exploded && !subParticle) { 
       explode();
     }
@@ -293,19 +297,25 @@ class Particle
     if (chance <= 0.25) {
       //FullEmission(pos);
     } else if ( chance <= 0.5) {
-      //FallerEmission(pos); 
+      //FallingParticleEmission(pos); 
     } else { 
       //SprawlingEmission(pos);
       //MixedEmission(pos);  
     }
     
-    GenerateDynamicEmission(pos);
+    for (int i = 0; i < 100; i++)
+    {
+      FallingParticle t = new FallingParticle(pos);
+      system.FallingParticles.add(t);
+    }
+    //GenerateDynamicEmission(pos);
     
     exploded = true;
   }
   
   public void display()
   {
+    // We dim the colour of the particle as the lifespan decreases 
     fill(c, map(lifespan, 0, 400, 0, 255));
     ellipse(pos.x, pos.y, size, size);
   }
@@ -326,9 +336,8 @@ class Particle
 // and movement types
 //////////////////////////////////////////////////////////////////////////////////////
 
-// RandomMovementParticle
-// As the name sugguests, these have force applied to them randomly meaning they have 
-// seperadic acceleration and directional movement
+// As the name suggests, these particles have force applied to them randomly meaning they have 
+// seperadic acceleration and random directional movement
 class RandomMovementParticle extends Particle
 {
   float limit;
@@ -346,12 +355,15 @@ class RandomMovementParticle extends Particle
   }
 }
 
-class Faller extends Particle
+// These particles are given an initial random outward velocity and acceleration
+// and are affected by gravity so fall downwards
+class FallingParticle extends Particle
 {
-  public Faller(PVector p)
+  public FallingParticle(PVector p)
   {
     super(p);
     
+    // Create initial velocity in random directions upon spawning
     this.vel = PVector.random2D().limit(random(3,6));//(0.5, 1));//random(1,2));
     this.acc = PVector.random2D().limit(random(3,6));//(random(0.5, 1));//random(1,2));
     this.c = color(random(0, 200), random(25, 100), random(0, 255));//color(random(75, 125), 0, random(0, 255));
@@ -363,12 +375,12 @@ class Faller extends Particle
   }
 }
 
-// TODO: Swap the name between this? (it falls eventually?, maybe have one actually just floats?)
-class Floater extends Particle
+// 
+class FloatingParticle extends Particle
 {
   float limit = 2;
   
-  public Floater(PVector p)
+  public FloatingParticle(PVector p)
   {
     super(p);
     
@@ -382,11 +394,11 @@ class Floater extends Particle
   }
 }
 
-class Sparkler extends Particle
+class SparklingParticle extends Particle
 {
   int r, g, b;
   
-  public Sparkler(PVector p, int _r, int _g, int _b)
+  public SparklingParticle(PVector p, int _r, int _g, int _b)
   {
     super(p);
     
@@ -408,9 +420,9 @@ class Sparkler extends Particle
 }
 
 // No gravity then fall off
-class Trailer extends Particle
+class TrailingParticle extends Particle
 {
-  public Trailer(PVector p)
+  public TrailingParticle(PVector p)
   {
     super(p);
     
@@ -420,13 +432,13 @@ class Trailer extends Particle
   }
 }
 
-class Twister extends Particle
+class TwistingParticle extends Particle
 {
   float theta;
   float rot;
  
   // spiral off (affected by gravity)
-  public Twister(PVector p)
+  public TwistingParticle(PVector p)
   {
     super(p);
     this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
@@ -467,14 +479,14 @@ void FullEmission(PVector pos)
   
   for (int x = 0; x < particles; x++) {
     RandomMovementParticle r = new RandomMovementParticle(pos);
-    Faller fa = new Faller(pos);
-    Floater f = new Floater(pos);
-    Twister t = new Twister(pos);
+    FallingParticle fa = new FallingParticle(pos);
+    FloatingParticle f = new FloatingParticle(pos);
+    TwistingParticle t = new TwistingParticle(pos);
     
     system.RandomMovementParticles.add(r);
-    system.fallers.add(fa);
-    system.floaters.add(f);
-    system.twisters.add(t);
+    system.FallingParticles.add(fa);
+    system.FloatingParticles.add(f);
+    system.TwistingParticles.add(t);
   }
 }
 
@@ -490,9 +502,9 @@ void ComplementaryEmission(PVector pos)
   
   for (int x = 0; x < particles; x++) {
     
-    Trailer tr = new Trailer(pos);
+    TrailingParticle tr = new TrailingParticle(pos);
     tr.c = color(amplify(base_red), amplify(base_green), amplify(base_blue));
-    system.trailers.add(tr);
+    system.TrailingParticles.add(tr);
     
     int count = (int) random(1, 6);
     switch(count)
@@ -502,26 +514,26 @@ void ComplementaryEmission(PVector pos)
         //system.RandomMovementParticles.add(r);
         break;
       case 2:
-        Twister t = new Twister(pos);
+        TwistingParticle t = new TwistingParticle(pos);
         t.c = color(base_red + (int) random(0, 25), base_green + (int) random(0, 25), base_blue);
-        system.twisters.add(t);
+        system.TwistingParticles.add(t);
         break;
       case 3:
         for (int i = 0; i < 5; i++) {
-          Faller f = new Faller(pos);
+          FallingParticle f = new FallingParticle(pos);
           f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
-          system.fallers.add(f);
+          system.FallingParticles.add(f);
         }
         break;
       case 4:
-        Floater fl = new Floater(pos);
+        FloatingParticle fl = new FloatingParticle(pos);
         fl.c = color(base_blue, base_red + (int) random(0, 25), base_green + (int) random(0, 25));
-        system.floaters.add(fl);
+        system.FloatingParticles.add(fl);
         break;
       case 5:
-        Sparkler s = new Sparkler(pos, base_red, base_green, base_blue);
+        SparklingParticle s = new SparklingParticle(pos, base_red, base_green, base_blue);
         s.c = color(base_red, base_blue, base_green);
-        system.sparklers.add(s);
+        system.SparklingParticles.add(s);
     }
   }
 }
@@ -552,42 +564,42 @@ void GenerateDynamicEmission(PVector pos)
       case 2:
         particleCount = (int) random(25, 175);
         for (int i = 0; i < particleCount; i++) {
-          Floater fl = new Floater(pos);
+          FloatingParticle fl = new FloatingParticle(pos);
           fl.limit = random(0.5, 2);
           fl.c = color(base_blue, base_red + (int) random(-25, 25), base_green + (int) random(-25, 25));
-          system.floaters.add(fl);
+          system.FloatingParticles.add(fl);
         }
         break;
       case 3:
         particleCount = (int) random(50, 150);
         for (int i = 0; i < particleCount; i++) {
-          Faller f = new Faller(pos);
+          FallingParticle f = new FallingParticle(pos);
           f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
-          system.fallers.add(f);
+          system.FallingParticles.add(f);
         }
         break;
       case 4:
         particleCount = (int) random(10, 100);
         for (int i = 0; i < particleCount; i++) {
-          Twister t = new Twister(pos);
+          TwistingParticle t = new TwistingParticle(pos);
           t.c = color(base_red + (int) random(-50, 50), base_green + (int) random(-50, 50), base_blue);
-          system.twisters.add(t);
+          system.TwistingParticles.add(t);
         }
         break;
       case 5:
         particleCount = (int) random(50, 150);
         for (int i = 0; i < particleCount; i++) {
-          Sparkler s = new Sparkler(pos, base_red, base_green, base_blue);
+          SparklingParticle s = new SparklingParticle(pos, base_red, base_green, base_blue);
           s.c = color(amplify(base_red), amplify(base_blue), amplify(base_green));
-          system.sparklers.add(s);
+          system.SparklingParticles.add(s);
         }
         break;
       case 6:
         particleCount = (int) random(50, 150);
         for (int i = 0; i < particleCount; i++) {
-          Trailer t = new Trailer(pos);
+          TrailingParticle t = new TrailingParticle(pos);
           t.c = color(amplify(base_red), amplify(base_blue), amplify(base_green));
-          system.trailers.add(t);
+          system.TrailingParticles.add(t);
         }
         break;
     }

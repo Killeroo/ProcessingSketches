@@ -8,13 +8,14 @@ final float GRAVITY = 0.03; //0.05
 // -> Dynamic Emission Generation
 //    +> Rip out generic Emissions (DONE)
 //    +> Wire up emmission triggers in Particle
-//    +> Keep some full Emissions
+//    +> Keep some full Emissions (DONE)
 // -> Add functions to generate colour relations of base colours
 //    +> Convert HSL then work out colour compliments etc
 //    +> Find out how the colour wheels do it
+//    +> Experiment with HSL and changing lightnes over lifespan
 // -> Clean the code
 //    +> Add comments and seperators (IN-PROGRESS)
-//    +> Rename particles (SparklingParticle -> SparklingParticleParticle)
+//    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
 //    +> Add explanation to what each particle does (IN-PROGRESS)
 //    +> Cleanup base particle class (DONE)
 
@@ -23,6 +24,7 @@ final float GRAVITY = 0.03; //0.05
 // -> Can you clean up the ParticleSystem updaters?
 // -> Randomised particle gravity
 // -> Stop initial upward force being default behaviour (DONE)
+// -> Slow down floater particles over lifespan like an actual firework
 
 // Nice to have:
 // -> New particles:

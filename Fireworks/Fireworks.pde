@@ -13,18 +13,20 @@ final float GRAVITY = 0.03; //0.05
 //    +> Convert HSL then work out colour compliments etc
 //    +> Find out how the colour wheels do it
 //    +> Experiment with HSL and changing lightnes over lifespan
+//    (https://medium.com/@MateMarschalko/dynamic-colour-palettes-with-sass-and-hsl-805b8bbef758)
 // -> Clean the code
 //    +> Add comments and seperators (IN-PROGRESS)
 //    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
 //    +> Add explanation to what each particle does (IN-PROGRESS)
 //    +> Cleanup base particle class (DONE)
+// -> Better firework scatter patterns (IN-PROGRESS)
 
 // Should:
 // -> Capitalise function and public variable names 
 // -> Can you clean up the ParticleSystem updaters?
 // -> Randomised particle gravity
 // -> Stop initial upward force being default behaviour (DONE)
-// -> Slow down floater particles over lifespan like an actual firework
+// -> Slow down floater particles over lifespan like an actual firework (DONE)
 
 // Nice to have:
 // -> New particles:
@@ -39,6 +41,8 @@ void setup()
 {
   size(1000, 1000);  
 }
+
+boolean bursting = false;
 
 void draw()
 {
@@ -55,14 +59,26 @@ void draw()
     Particle p = new Particle(new PVector(width/2, height));
     
     // Apply some initial upward force
-    p.applyForce(new PVector(0, random(-10, -30)));
+    p.applyForce(new PVector(random(-1, 1), random(-10, -30)));
     
     // Add to particle system
     system.particles.add(p);
     
     // Interval between fireworks
-    interval = millis() + 2000;
+    if (bursting)
+    {
+      interval = millis() + 500;  
+    }
+    else
+    {
+      interval = millis() + 2000;  
+    }
   }
+}
+
+void mousePressed()
+{
+  bursting = !bursting;  
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +165,12 @@ class ParticleSystem
     while (i.hasNext()) {
       FloatingParticle f = i.next();
       
-      f.vel.limit(f.limit);
+      
+      if (f.lifespan < 75) {
+      } else {
+        f.vel.limit(f.limit);
+      }
+      
       f.move();
       
       if (f.isDead()) {
@@ -307,10 +328,12 @@ class Particle
     
     for (int i = 0; i < 100; i++)
     {
-      FallingParticle t = new FallingParticle(pos);
-      system.FallingParticles.add(t);
+      //FallingParticle t = new FallingParticle(pos);
+      FloatingParticle f = new FloatingParticle(pos);
+      
+      //system.FloatingParticles.add(f);
     }
-    //GenerateDynamicEmission(pos);
+    GenerateDynamicEmission(pos);
     
     exploded = true;
   }
@@ -348,7 +371,7 @@ class RandomMovementParticle extends Particle
   {
     super(p);  
     
-    this.limit = 1;
+    this.limit = 1.5;
     this.c = color(random(150, 255), 40, random(0, 150));
     this.subParticle = true;
     this.applyForce(PVector.random2D());
@@ -387,7 +410,6 @@ class FloatingParticle extends Particle
     super(p);
     
     this.c = color(random(200, 255), random(200, 255), 0);
-    
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
@@ -540,7 +562,7 @@ void ComplementaryEmission(PVector pos)
   }
 }
 
-// Dynamically generates an emission pattern
+// Dynamically generates an emission pattern from all available particle types
 void GenerateDynamicEmission(PVector pos)
 {
   // Base colours to derive everything from

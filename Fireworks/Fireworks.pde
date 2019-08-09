@@ -17,14 +17,14 @@ final float GRAVITY = 0.03; //0.05
 // -> Clean the code
 //    +> Add comments and seperators (IN-PROGRESS)
 //    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
-//    +> Add explanation to what each particle does (IN-PROGRESS)
+//    +> Add explanation to what each particle does (DONE)
 //    +> Cleanup base particle class (DONE)
 // -> Better firework scatter patterns (IN-PROGRESS)
 
 // Should:
 // -> Capitalise function and public variable names 
 // -> Can you clean up the ParticleSystem updaters?
-// -> Randomised particle gravity
+// -> Randomised particle gravity and size of particle
 // -> Stop initial upward force being default behaviour (DONE)
 // -> Slow down floater particles over lifespan like an actual firework (DONE)
 
@@ -32,7 +32,7 @@ final float GRAVITY = 0.03; //0.05
 // -> New particles:
 //    +> Octopus wandering
 //    +> Explosions within explosions
-// -> Make the explosion code less hacky
+// -> Make the explosion code less hacky (DONE)
 
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
@@ -315,23 +315,13 @@ class Particle
   
   public void explode()
   {
-    
-    float chance = random(0, 1);
-    if (chance <= 0.25) {
-      //FullEmission(pos);
-    } else if ( chance <= 0.5) {
-      //FallingParticleEmission(pos); 
-    } else { 
-      //SprawlingEmission(pos);
-      //MixedEmission(pos);  
-    }
-    
     for (int i = 0; i < 100; i++)
     {
       //FallingParticle t = new FallingParticle(pos);
-      FloatingParticle f = new FloatingParticle(pos);
+      TrailingParticle f = new TrailingParticle(pos);
       
       //system.FloatingParticles.add(f);
+      //system.TrailingParticles.add(f);
     }
     GenerateDynamicEmission(pos);
     
@@ -400,7 +390,8 @@ class FallingParticle extends Particle
   }
 }
 
-// 
+// Floating particle moves out from their place of origin with a constant
+// velocity that doesn't change over time, they are also not affected by gravity
 class FloatingParticle extends Particle
 {
   float limit = 2;
@@ -418,6 +409,9 @@ class FloatingParticle extends Particle
   }
 }
 
+// Sparkling particles are normal particles, slowed and affected by gravity
+// when displayed we render small points randomly around its position to give
+// the sparkle effect
 class SparklingParticle extends Particle
 {
   int r, g, b;
@@ -443,19 +437,23 @@ class SparklingParticle extends Particle
   }
 }
 
-// No gravity then fall off
+// Trailing particles start off like Floating particles; with no gravity and a fixed
+// velocity but after a certain period gravity is applied to them till their lifespan reaches 0
 class TrailingParticle extends Particle
 {
   public TrailingParticle(PVector p)
   {
     super(p);
     
-    this.lifespan = 255;
+    this.lifespan = (int) random(275, 350);
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(0.1,7)));
+    this.applyForce(PVector.random2D().mult(2));
   }
 }
 
+// Twisters act like normal particles, are affected by gravity but instead of displaying
+// an ellipse at their current position, 2 points are drawn rotating around their current 
+// position
 class TwistingParticle extends Particle
 {
   float theta;
@@ -487,6 +485,44 @@ class TwistingParticle extends Particle
     ellipse(5, 5, size, size);
     ellipse(-5, -5, size, size);
     popMatrix();
+  }
+}
+
+class Splitter extends Particle
+{
+  int interations = 10;
+  public Splitter(PVector p)
+  {
+    super(p);
+    
+    this.lifespan = 150;
+  }
+  
+  public void move()
+  {
+    vel.add(acc); // Apply acceleration
+    pos.add(vel); // Apply our speed vector to our position 
+    acc.mult(0);
+    
+    if (lifespan < 75 && !exploded) {
+      explode();
+      exploded = true;
+    }
+    
+    // Decrease particle lifespan
+    lifespan--;
+  }
+  
+  public void explode()
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      SplitterParticle s = new SplitterParticle(pos);
+      
+    }
+    GenerateDynamicEmission(pos);
+    
+    exploded = true;
   }
 }
 
@@ -570,10 +606,10 @@ void GenerateDynamicEmission(PVector pos)
   int base_green = (int) random(0, 255);
   int base_blue = (int) random(0, 255);
   
-  int iterations = (int) random(2, 6);
+  int iterations = (int) random(2, 7);
   
   for (int x = 0; x < iterations; x++) {
-    int choice = (int) random(1, 6);
+    int choice = (int) random(1, 7);
     int particleCount = 0;
     
     switch(choice) {
@@ -622,7 +658,7 @@ void GenerateDynamicEmission(PVector pos)
         particleCount = (int) random(50, 150);
         for (int i = 0; i < particleCount; i++) {
           TrailingParticle t = new TrailingParticle(pos);
-          t.c = color(amplify(base_red), amplify(base_blue), amplify(base_green));
+          t.c = color(base_red + (int) random(-30, 30), base_blue + (int) random(-30, 30), base_green + (int) random(-30, 30));
           system.TrailingParticles.add(t);
         }
         break;

@@ -31,7 +31,7 @@ final float GRAVITY = 0.03; //0.05
 // Nice to have:
 // -> New particles:
 //    +> Octopus wandering
-//    +> Explosions within explosions
+//    +> Explosions within explosions (IN-PROGRESS)
 // -> Make the explosion code less hacky (DONE)
 
 ParticleSystem system = new ParticleSystem();
@@ -98,6 +98,9 @@ class ParticleSystem
   ArrayList<TwistingParticle> TwistingParticles = new ArrayList<TwistingParticle>();
   ArrayList<SparklingParticle> SparklingParticles = new ArrayList<SparklingParticle>();
   ArrayList<TrailingParticle> TrailingParticles = new ArrayList<TrailingParticle>();
+  ArrayList<SplitterParticle> SplitterParticles = new ArrayList<SplitterParticle>();
+  
+  ArrayList<SplitterParticle> SplitterParticlesToAdd = new ArrayList<SplitterParticle>();
   
   void update()
   {  
@@ -109,6 +112,7 @@ class ParticleSystem
     this.updateTwistingParticles();
     this.updateSparklingParticles();
     this.updateTrailingParticles();
+    this.updateSplitterParticles();
   }
   
   // Most update functions 
@@ -166,11 +170,7 @@ class ParticleSystem
       FloatingParticle f = i.next();
       
       
-      if (f.lifespan < 75) {
-      } else {
-        f.vel.limit(f.limit);
-      }
-      
+      f.vel.limit(f.limit);
       f.move();
       
       if (f.isDead()) {
@@ -240,6 +240,29 @@ class ParticleSystem
   }
   
   void updateTrailingParticles()
+  {
+    Iterator<TrailingParticle> i = TrailingParticles.iterator();
+    while (i.hasNext()) {
+      TrailingParticle t = i.next();
+      
+      if (t.lifespan < 175) {
+        
+        //t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
+        //t.vel.limit(0.5); //1 //0.05);
+      } 
+      
+      t.applyForce(new PVector(0, 0.005));
+      t.move();
+      
+      if (t.isDead()) {
+        i.remove();
+      } else {
+        t.display();
+      }
+    }
+  }
+  
+  void updateSplitterParticles()
   {
     Iterator<TrailingParticle> i = TrailingParticles.iterator();
     while (i.hasNext()) {
@@ -488,10 +511,10 @@ class TwistingParticle extends Particle
   }
 }
 
-class Splitter extends Particle
+class SplitterParticle extends Particle
 {
   int interations = 10;
-  public Splitter(PVector p)
+  public SplitterParticle(PVector p)
   {
     super(p);
     
@@ -518,7 +541,8 @@ class Splitter extends Particle
     for (int i = 0; i < 5; i++)
     {
       SplitterParticle s = new SplitterParticle(pos);
-      
+      s.interations--;
+      system.SplitterParticlesToAdd.add(s);
     }
     GenerateDynamicEmission(pos);
     

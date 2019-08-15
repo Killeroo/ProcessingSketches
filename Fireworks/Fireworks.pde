@@ -24,7 +24,7 @@ final float GRAVITY = 0.03; //0.05
 // Should:
 // -> Capitalise function and public variable names 
 // -> Can you clean up the ParticleSystem updaters?
-// -> Randomised particle gravity and size of particle
+// -> Randomised particle gravity, speed and size of particle
 // -> Stop initial upward force being default behaviour (DONE)
 // -> Slow down floater particles over lifespan like an actual firework (DONE)
 
@@ -341,10 +341,11 @@ class Particle
     for (int i = 0; i < 100; i++)
     {
       //FallingParticle t = new FallingParticle(pos);
-      TrailingParticle f = new TrailingParticle(pos);
+      //RandomMovementParticle f = new RandomMovementParticle(pos);
       
       //system.FloatingParticles.add(f);
       //system.TrailingParticles.add(f);
+      //system.RandomMovementParticles.add(f);
     }
     GenerateDynamicEmission(pos);
     
@@ -379,17 +380,27 @@ class Particle
 class RandomMovementParticle extends Particle
 {
   float limit;
+  float lerpIteration = 0;
+  color target;
   
   public RandomMovementParticle(PVector p)
   {
     super(p);  
     
-    this.limit = 1.5;
-    this.c = color(random(150, 255), 40, random(0, 150));
+    this.limit = 2;//1.5;
+    this.c = color(random(150, 255), 50, random(150, 255));
+    this.target = color(50, random(150, 255), random(0, 150));
     this.subParticle = true;
     this.applyForce(PVector.random2D());
     this.lifespan = 125;
     this.size = 2.5;
+  }
+  void display()
+  {
+    fill(lerpColor(c, target, lerpIteration), map(lifespan, 0, 125, 0, 255));
+    ellipse(pos.x, pos.y, size, size);
+    
+    lerpIteration += 0.01;
   }
 }
 
@@ -470,7 +481,7 @@ class TrailingParticle extends Particle
     
     this.lifespan = (int) random(275, 350);
     this.subParticle = true;
-    this.applyForce(PVector.random2D().mult(2));
+    this.applyForce(PVector.random2D().mult(random(1, 2)));//1.5));
   }
 }
 
@@ -642,6 +653,7 @@ void GenerateDynamicEmission(PVector pos)
         for (int i = 0; i < particleCount; i++) {
           RandomMovementParticle r = new RandomMovementParticle(pos);
           r.c = color(base_red + random(-20, 20), base_blue + random(-20, 20), base_green + random(-20, 20));
+          r.target = color(amplify(base_red), amplify(base_green), amplify(base_blue));
           system.RandomMovementParticles.add(r);
         }
         break;

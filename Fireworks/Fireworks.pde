@@ -19,7 +19,7 @@ final float GRAVITY = 0.03; //0.05
 //    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
 //    +> Add explanation to what each particle does (DONE)
 //    +> Cleanup base particle class (DONE)
-// -> Better firework scatter patterns (IN-PROGRESS)
+// -> Better firework scatter patterns, dynamically change firerate (IN-PROGRESS)
 
 // Should:
 // -> Capitalise function and public variable names 
@@ -31,7 +31,7 @@ final float GRAVITY = 0.03; //0.05
 // Nice to have:
 // -> New particles:
 //    +> Octopus wandering
-//    +> Explosions within explosions (IN-PROGRESS)
+//    +> Explosions within explosions (NEEDS CLEANUP)
 // -> Make the explosion code less hacky (DONE)
 
 ParticleSystem system = new ParticleSystem();
@@ -264,9 +264,9 @@ class ParticleSystem
   
   void updateSplitterParticles()
   {
-    Iterator<TrailingParticle> i = TrailingParticles.iterator();
+    Iterator<SplitterParticle> i = SplitterParticles.iterator();
     while (i.hasNext()) {
-      TrailingParticle t = i.next();
+      SplitterParticle t = i.next();
       
       if (t.lifespan < 175) {
         
@@ -274,7 +274,7 @@ class ParticleSystem
         //t.vel.limit(0.5); //1 //0.05);
       } 
       
-      t.applyForce(new PVector(0, 0.005));
+      //t.applyForce(new PVector(0, 0.005));
       t.move();
       
       if (t.isDead()) {
@@ -282,7 +282,18 @@ class ParticleSystem
       } else {
         t.display();
       }
+      
+      if (t.exploded) {
+        i.remove();  
+      }
     }
+    
+    // Add generated particles to main particle update list
+    for (int x = 0; x < SplitterParticlesToAdd.size(); x++) {
+      SplitterParticles.add(SplitterParticlesToAdd.get(x));  
+    }
+    
+    SplitterParticlesToAdd.clear();
   }
 }
 
@@ -338,11 +349,13 @@ class Particle
   
   public void explode()
   {
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 5; i++)
     {
       //FallingParticle t = new FallingParticle(pos);
+      SplitterParticle p = new SplitterParticle(pos);
       //RandomMovementParticle f = new RandomMovementParticle(pos);
       
+      //system.SplitterParticles.add(p);
       //system.FloatingParticles.add(f);
       //system.TrailingParticles.add(f);
       //system.RandomMovementParticles.add(f);
@@ -524,12 +537,14 @@ class TwistingParticle extends Particle
 
 class SplitterParticle extends Particle
 {
-  int interations = 10;
+  int iterations = 3;
   public SplitterParticle(PVector p)
   {
     super(p);
     
     this.lifespan = 150;
+    this.acc = PVector.random2D();
+    this.applyForce(PVector.random2D());
   }
   
   public void move()
@@ -540,7 +555,7 @@ class SplitterParticle extends Particle
     
     if (lifespan < 75 && !exploded) {
       explode();
-      exploded = true;
+      //exploded = true;
     }
     
     // Decrease particle lifespan
@@ -549,13 +564,16 @@ class SplitterParticle extends Particle
   
   public void explode()
   {
-    for (int i = 0; i < 5; i++)
-    {
+    if (iterations == 0) {
+      return;
+    }
+    
+    for (int i = 0; i < 5; i++) {
       SplitterParticle s = new SplitterParticle(pos);
-      s.interations--;
+      s.iterations = this.iterations - 1;
       system.SplitterParticlesToAdd.add(s);
     }
-    GenerateDynamicEmission(pos);
+    //GenerateDynamicEmission(pos);
     
     exploded = true;
   }

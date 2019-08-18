@@ -5,6 +5,7 @@ final float GRAVITY = 0.03; //0.05
 // TODO:
 // -------
 // Must:
+// -> Final polish, comments and efficientsy pass
 // -> Dynamic Emission Generation
 //    +> Rip out generic Emissions (DONE)
 //    +> Wire up emmission triggers in Particle
@@ -245,12 +246,6 @@ class ParticleSystem
     while (i.hasNext()) {
       TrailingParticle t = i.next();
       
-      if (t.lifespan < 175) {
-        
-        //t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
-        //t.vel.limit(0.5); //1 //0.05);
-      } 
-      
       t.applyForce(new PVector(0, 0.005));
       t.move();
       
@@ -268,13 +263,10 @@ class ParticleSystem
     while (i.hasNext()) {
       SplitterParticle t = i.next();
       
-      if (t.lifespan < 175) {
-        
-        //t.applyForce(new PVector(0, 0.025));//1));//1));//0.05));
-        //t.vel.limit(0.5); //1 //0.05);
-      } 
+      //if (t.iterations > 1) {
+        t.applyForce(new PVector(0, GRAVITY));//0.005));  
+      //}
       
-      //t.applyForce(new PVector(0, 0.005));
       t.move();
       
       if (t.isDead()) {
@@ -353,14 +345,16 @@ class Particle
     {
       //FallingParticle t = new FallingParticle(pos);
       SplitterParticle p = new SplitterParticle(pos);
+      p.c = color(random(0, 255), random(0, 255), random(0, 255));
+      p.iterations = (int) random(1, 3);
       //RandomMovementParticle f = new RandomMovementParticle(pos);
       
-      //system.SplitterParticles.add(p);
+      system.SplitterParticles.add(p);
       //system.FloatingParticles.add(f);
       //system.TrailingParticles.add(f);
       //system.RandomMovementParticles.add(f);
     }
-    GenerateDynamicEmission(pos);
+    //GenerateDynamicEmission(pos);
     
     exploded = true;
   }
@@ -400,7 +394,7 @@ class RandomMovementParticle extends Particle
   {
     super(p);  
     
-    this.limit = 2;//1.5;
+    this.limit = 2;
     this.c = color(random(150, 255), 50, random(150, 255));
     this.target = color(50, random(150, 255), random(0, 150));
     this.subParticle = true;
@@ -538,13 +532,14 @@ class TwistingParticle extends Particle
 class SplitterParticle extends Particle
 {
   int iterations = 3;
+  
   public SplitterParticle(PVector p)
   {
     super(p);
     
     this.lifespan = 150;
     this.acc = PVector.random2D();
-    this.applyForce(PVector.random2D());
+    //this.applyForce(PVector.random2D());
   }
   
   public void move()
@@ -564,18 +559,27 @@ class SplitterParticle extends Particle
   
   public void explode()
   {
+    // if we are at 0 iterations we don't bother spawning new particles anymore
     if (iterations == 0) {
       return;
     }
     
+    // Spawn 5 new splitter particles at our position
+    // (lower the iterations so we know when to stop)
     for (int i = 0; i < 5; i++) {
       SplitterParticle s = new SplitterParticle(pos);
       s.iterations = this.iterations - 1;
+      s.c = this.c;
       system.SplitterParticlesToAdd.add(s);
     }
-    //GenerateDynamicEmission(pos);
     
     exploded = true;
+  }
+  
+  void display()
+  {
+    fill (c, map(lifespan, 0, 150, 0, 255));
+    ellipse(pos.x, pos.y, size, size);
   }
 }
 

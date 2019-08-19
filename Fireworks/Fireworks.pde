@@ -32,11 +32,13 @@ final float GRAVITY = 0.03; //0.05
 // Nice to have:
 // -> New particles:
 //    +> Octopus wandering
-//    +> Explosions within explosions (NEEDS CLEANUP)
+//    +> Explosions within explosions (DONE)
 // -> Make the explosion code less hacky (DONE)
 
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
+
+boolean flashing = false;
 
 void setup()
 {
@@ -47,10 +49,15 @@ boolean bursting = false;
 
 void draw()
 {
-  // Motion blur
-  noStroke();
-  fill(0, 20);
-  rect(0, 0, width, height);
+  if (flashing) {
+    //background(255);
+    flashing = false;
+  } else {
+    // Motion blur
+    noStroke();
+    fill(0, 20);
+    rect(0, 0, width, height);
+  }
   
   // Update the particle system
   system.update();
@@ -100,8 +107,9 @@ class ParticleSystem
   ArrayList<SparklingParticle> SparklingParticles = new ArrayList<SparklingParticle>();
   ArrayList<TrailingParticle> TrailingParticles = new ArrayList<TrailingParticle>();
   ArrayList<SplitterParticle> SplitterParticles = new ArrayList<SplitterParticle>();
-  
   ArrayList<SplitterParticle> SplitterParticlesToAdd = new ArrayList<SplitterParticle>();
+  
+  ArrayList<Halo> Halos = new ArrayList<Halo>();
   
   void update()
   {  
@@ -114,6 +122,9 @@ class ParticleSystem
     this.updateSparklingParticles();
     this.updateTrailingParticles();
     this.updateSplitterParticles();
+    
+    // Update the halo rings that form around some explosions
+    this.updateHalos();
   }
   
   // Most update functions 
@@ -263,10 +274,7 @@ class ParticleSystem
     while (i.hasNext()) {
       SplitterParticle t = i.next();
       
-      //if (t.iterations > 1) {
-        t.applyForce(new PVector(0, GRAVITY));//0.005));  
-      //}
-      
+      t.applyForce(new PVector(0, GRAVITY));
       t.move();
       
       if (t.isDead()) {
@@ -275,6 +283,7 @@ class ParticleSystem
         t.display();
       }
       
+      // Remove particles that have exploded/split as well
       if (t.exploded) {
         i.remove();  
       }
@@ -286,6 +295,27 @@ class ParticleSystem
     }
     
     SplitterParticlesToAdd.clear();
+  }
+  
+  void updateHalos()
+  {
+    Iterator<Halo> i = Halos.iterator();
+    while (i.hasNext()) {
+      Halo h = i.next();
+      
+      h.update();
+      
+      if (h.isDead()) {
+        i.remove();
+      } else {
+        h.display();
+      }
+    }
+    
+    // Add generated particles to main particle update list
+    for (int x = 0; x < SplitterParticlesToAdd.size(); x++) {
+      SplitterParticles.add(SplitterParticlesToAdd.get(x));  
+    }
   }
 }
 
@@ -341,22 +371,10 @@ class Particle
   
   public void explode()
   {
-    for (int i = 0; i < 5; i++)
-    {
-      //FallingParticle t = new FallingParticle(pos);
-      SplitterParticle p = new SplitterParticle(pos);
-      p.c = color(random(0, 255), random(0, 255), random(0, 255));
-      p.iterations = (int) random(1, 3);
-      //RandomMovementParticle f = new RandomMovementParticle(pos);
-      
-      system.SplitterParticles.add(p);
-      //system.FloatingParticles.add(f);
-      //system.TrailingParticles.add(f);
-      //system.RandomMovementParticles.add(f);
-    }
-    //GenerateDynamicEmission(pos);
+    GenerateDynamicEmission(pos);
     
     exploded = true;
+    flashing = true;
   }
   
   public void display()
@@ -380,6 +398,11 @@ class Particle
 // Firework types
 // These types all derive from the base particle class, each has its own set of properties
 // and movement types
+//
+// NOTE: Alot of the actual characteristics described in the following comments like
+// application of gravity etc are done in the ParticleSystem, under the corresponding 
+// function for updating the particular particle type.
+// For example, RandomMovementParticles are updated in ParticleSystem.updateRandomMovementParticle()
 //////////////////////////////////////////////////////////////////////////////////////
 
 // As the name suggests, these particles have force applied to them randomly meaning they have 
@@ -420,12 +443,11 @@ class FallingParticle extends Particle
     super(p);
     
     // Create initial velocity in random directions upon spawning
-    this.vel = PVector.random2D().limit(random(3,6));//(0.5, 1));//random(1,2));
-    this.acc = PVector.random2D().limit(random(3,6));//(random(0.5, 1));//random(1,2));
-    this.c = color(random(0, 200), random(25, 100), random(0, 255));//color(random(75, 125), 0, random(0, 255));
-    
+    this.vel = PVector.random2D().limit(random(3,6));
+    this.acc = PVector.random2D().limit(random(3,6));
+    this.c = color(random(0, 200), random(25, 100), random(0, 255));
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(2,6)));//1, 2)));
+    this.applyForce(PVector.random2D().limit(random(2,6)));
     this.lifespan = 250;
     this.size = 1;
   }
@@ -445,7 +467,7 @@ class FloatingParticle extends Particle
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.lifespan = 175;//125;
+    this.lifespan = 175;
     this.size = 3;
   }
 }
@@ -463,8 +485,8 @@ class SparklingParticle extends Particle
     
     this.lifespan = 315;
     this.subParticle = true;
-    this.vel = PVector.random2D().limit(random(0.25, 0.5));//random(0.5, 1));//random(1,2));
-    this.acc = PVector.random2D().limit(random(0.25, 0.5));//random(0.5, 1));//random(1,2));
+    this.vel = PVector.random2D().limit(random(0.25, 0.5));
+    this.acc = PVector.random2D().limit(random(0.25, 0.5));
     
     this.r = _r;
     this.g = _g;
@@ -504,8 +526,8 @@ class TwistingParticle extends Particle
   public TwistingParticle(PVector p)
   {
     super(p);
-    this.vel = PVector.random2D().limit(random(0.5, 1));//random(1,2));
-    this.acc = PVector.random2D().limit(random(0.5, 1));//random(1,2));
+    this.vel = PVector.random2D().limit(random(0.5, 1));
+    this.acc = PVector.random2D().limit(random(0.5, 1));
     this.c = color(random(25, 255), random(75, 125), 0);
     this.rot = random(50, 150);
     
@@ -519,6 +541,7 @@ class TwistingParticle extends Particle
   {
     fill(c, map(lifespan, 0, 400, 0, 255));
     
+    // Rotate around our current point in the sketch
     pushMatrix();
     translate(pos.x, pos.y);
     rotate(theta);
@@ -529,6 +552,10 @@ class TwistingParticle extends Particle
   }
 }
 
+// Splitter particles act like base particle (are affected by gravity and are give
+// a random inital force) but after a certain period of time they explode and spawn
+// other splitter particles in their place. The number of times this occurs is 
+// controlled by the iteration property which gets decremented each time they exploded
 class SplitterParticle extends Particle
 {
   int iterations = 3;
@@ -539,7 +566,6 @@ class SplitterParticle extends Particle
     
     this.lifespan = 150;
     this.acc = PVector.random2D();
-    //this.applyForce(PVector.random2D());
   }
   
   public void move()
@@ -548,9 +574,9 @@ class SplitterParticle extends Particle
     pos.add(vel); // Apply our speed vector to our position 
     acc.mult(0);
     
+    // Explode after an arbitary lifespan
     if (lifespan < 75 && !exploded) {
       explode();
-      //exploded = true;
     }
     
     // Decrease particle lifespan
@@ -573,6 +599,7 @@ class SplitterParticle extends Particle
       system.SplitterParticlesToAdd.add(s);
     }
     
+    // Signal for removal
     exploded = true;
   }
   
@@ -584,28 +611,55 @@ class SplitterParticle extends Particle
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Explosion Halo 
+// Draws a slowly expanding halo/circle around an explosion point. Speed is slightly
+// random, size is controlled by the lifespan which is fixed because I am lazy ;)
+//////////////////////////////////////////////////////////////////////////////////////
+
+class Halo
+{
+  color c;
+  PVector pos;
+  float size = 1;
+  float speed;
+  int lifespan = 150;
+  
+  Halo(PVector start, color colour)
+  {
+    pos = start;
+    c = colour;
+    speed = random(1, 4);
+  }
+  
+  void update()
+  {
+    size = size + speed;
+    lifespan--; 
+  }
+  
+  void display()
+  { 
+    stroke(c, map(lifespan, 0, 150, 0, 255));
+    noFill();
+    ellipse(pos.x, pos.y, size, size);
+    noStroke();
+  }
+ 
+  boolean isDead()
+  {
+    if (lifespan < 0) {
+      return true;
+    } else {
+      return false;  
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Emission functions
 // Control the different ways the fireworks explode (What type of particles are used,
 // how many are spawned and introduces some variance to their colours, speed and gravity
 //////////////////////////////////////////////////////////////////////////////////////
-
-// Spawn every type of particle, pretty generic
-void FullEmission(PVector pos)
-{
-  int particles = (int) random(100, 400);
-  
-  for (int x = 0; x < particles; x++) {
-    RandomMovementParticle r = new RandomMovementParticle(pos);
-    FallingParticle fa = new FallingParticle(pos);
-    FloatingParticle f = new FloatingParticle(pos);
-    TwistingParticle t = new TwistingParticle(pos);
-    
-    system.RandomMovementParticles.add(r);
-    system.FallingParticles.add(fa);
-    system.FloatingParticles.add(f);
-    system.TwistingParticles.add(t);
-  }
-}
 
 // Emission with all particle types, uses complimentary colours
 void ComplementaryEmission(PVector pos)
@@ -663,12 +717,17 @@ void GenerateDynamicEmission(PVector pos)
   int base_green = (int) random(0, 255);
   int base_blue = (int) random(0, 255);
   
+  // Number of lots of particles we are going to create
   int iterations = (int) random(2, 7);
   
+  // For each iteration...
   for (int x = 0; x < iterations; x++) {
-    int choice = (int) random(1, 7);
+    int choice = (int) random(1, 8);
     int particleCount = 0;
     
+    // ... pick a random type of particle to spawn
+    // (Below is every type of particle, we create variance here and add colours
+    // that normally derive from the base colours)
     switch(choice) {
       case 1: 
         particleCount = (int) random(50, 150);
@@ -720,7 +779,22 @@ void GenerateDynamicEmission(PVector pos)
           system.TrailingParticles.add(t);
         }
         break;
+      case 7:
+        particleCount = (int) random(3, 5);
+        for (int i = 0; i < particleCount; i++) {
+          SplitterParticle p = new SplitterParticle(pos);
+          p.c = color(random(0, 255), random(0, 255), random(0, 255));
+          p.iterations = (int) random(1, 3);
+          system.SplitterParticles.add(p);
+        }
+        break;
     }
+  }
+  
+  // Only add halo rings on particularly big emissions
+  if (iterations > 5) {
+    Halo h = new Halo(pos, color(amplify(base_red), amplify(base_green), amplify(base_blue)));
+    system.Halos.add(h);
   }
 }
 

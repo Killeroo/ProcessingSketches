@@ -12,7 +12,7 @@ final float GRAVITY = 0.03; //0.05
 //    +> Keep some full Emissions (DONE)
 // -> Clean the code
 //    +> Add comments and seperators (DONE)
-//    +> Move constants to start
+//    +> Move constants to start (IN-PROGRESS)
 //    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
 //    +> Add explanation to what each particle does (DONE)
 //    +> Cleanup base particle class (DONE)
@@ -30,7 +30,7 @@ final float GRAVITY = 0.03; //0.05
 //    +> Octopus wandering (WON'T ADD)
 //    +> Explosions within explosions (DONE)
 // -> Make the explosion code less hacky (DONE)
-// -> Add functions to generate colour relations of base colours
+// -> Add functions to generate colour relations of base colours (WON'T ADD)
 //    +> Convert HSL then work out colour compliments etc
 //    +> Find out how the colour wheels do it
 //    +> Experiment with HSL and changing lightnes over lifespan

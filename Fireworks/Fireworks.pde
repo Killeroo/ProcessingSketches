@@ -10,52 +10,65 @@ final float GRAVITY = 0.03; //0.05
 //    +> Rip out generic Emissions (DONE)
 //    +> Wire up emmission triggers in Particle
 //    +> Keep some full Emissions (DONE)
-// -> Add functions to generate colour relations of base colours
-//    +> Convert HSL then work out colour compliments etc
-//    +> Find out how the colour wheels do it
-//    +> Experiment with HSL and changing lightnes over lifespan
-//    (https://medium.com/@MateMarschalko/dynamic-colour-palettes-with-sass-and-hsl-805b8bbef758)
 // -> Clean the code
-//    +> Add comments and seperators (IN-PROGRESS)
+//    +> Add comments and seperators (DONE)
+//    +> Move constants to start
 //    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
 //    +> Add explanation to what each particle does (DONE)
 //    +> Cleanup base particle class (DONE)
-// -> Better firework scatter patterns, dynamically change firerate (IN-PROGRESS)
+// -> Better firework scatter patterns, dynamically change firerate (DONE)
 
 // Should:
 // -> Capitalise function and public variable names 
-// -> Can you clean up the ParticleSystem updaters?
+// -> Can you clean up the ParticleSystem updaters? (DONE)
 // -> Randomised particle gravity, speed and size of particle
 // -> Stop initial upward force being default behaviour (DONE)
 // -> Slow down floater particles over lifespan like an actual firework (DONE)
 
 // Nice to have:
 // -> New particles:
-//    +> Octopus wandering
+//    +> Octopus wandering (WON'T ADD)
 //    +> Explosions within explosions (DONE)
 // -> Make the explosion code less hacky (DONE)
+// -> Add functions to generate colour relations of base colours
+//    +> Convert HSL then work out colour compliments etc
+//    +> Find out how the colour wheels do it
+//    +> Experiment with HSL and changing lightnes over lifespan
+//    (https://medium.com/@MateMarschalko/dynamic-colour-palettes-with-sass-and-hsl-805b8bbef758)
 
+/* General simultation options */
+final boolean ENABLE_EXPLOSION_FLASHES = false;
+final int BACKGROUND_COLOUR = 0;
+final int MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
+
+/* Initial firework properties */
+final int MIN_INITIAL_SIDEWAYS_FORCE = -1;
+final int MAX_INITIAL_SIDEWAYS_FORCE = 1;
+final int MIN_INITIAL_UPWARDS_FORCE = -10;
+final int MAX_INITIAL_UPWARDS_FORCE = -30;
+
+/* Base particle properties */ 
+
+// Internal variables
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
-
 boolean flashing = false;
+boolean bursting = false;
 
 void setup()
 {
   size(1000, 1000);  
 }
 
-boolean bursting = false;
-
 void draw()
 {
-  if (flashing) {
-    //background(255);
+  if (flashing && ENABLE_EXPLOSION_FLASHES) {
+    background(255);
     flashing = false;
   } else {
     // Motion blur
     noStroke();
-    fill(0, 20);
+    fill(BACKGROUND_COLOUR, MOTION_BLUR_FACTOR);
     rect(0, 0, width, height);
   }
   
@@ -67,18 +80,15 @@ void draw()
     Particle p = new Particle(new PVector(width/2, height));
     
     // Apply some initial upward force
-    p.applyForce(new PVector(random(-1, 1), random(-10, -30)));
+    p.applyForce(new PVector(random(MIN_INITIAL_SIDEWAYS_FORCE, MAX_INITIAL_SIDEWAYS_FORCE), random(MIN_INITIAL_UPWARDS_FORCE, MAX_INITIAL_UPWARDS_FORCE)));
     
     // Add to particle system
     system.particles.add(p);
     
-    // Interval between fireworks
-    if (bursting)
-    {
+    // Interval between initial fireworks
+    if (bursting) {
       interval = millis() + 500;  
-    }
-    else
-    {
+    } else {
       interval = millis() + 2000;  
     }
   }
@@ -109,6 +119,7 @@ class ParticleSystem
   ArrayList<SplitterParticle> SplitterParticles = new ArrayList<SplitterParticle>();
   ArrayList<SplitterParticle> SplitterParticlesToAdd = new ArrayList<SplitterParticle>();
   
+  // Explosions rings
   ArrayList<Halo> Halos = new ArrayList<Halo>();
   
   void update()
@@ -216,7 +227,7 @@ class ParticleSystem
     while (i.hasNext()) {
       TwistingParticle t = i.next();
       
-      t.applyForce(new PVector(0, 0.01)); // TODO: Change to 0? 
+      t.applyForce(new PVector(0, 0.01)); 
       t.move();
       
       if (t.isDead()) {

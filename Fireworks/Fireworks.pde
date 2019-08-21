@@ -6,9 +6,10 @@ final float GRAVITY = 0.03; //0.05
 // -------
 // Must:
 // -> Final polish, comments and efficientsy pass
+// -> Randomise speed of particles (floaters, more powow to explosion)
 // -> Dynamic Emission Generation
 //    +> Rip out generic Emissions (DONE)
-//    +> Wire up emmission triggers in Particle
+//    +> Rename emission function
 //    +> Keep some full Emissions (DONE)
 // -> Clean the code
 //    +> Add comments and seperators (DONE)
@@ -41,13 +42,19 @@ final boolean ENABLE_EXPLOSION_FLASHES = false;
 final int BACKGROUND_COLOUR = 0;
 final int MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
 
-/* Initial firework properties */
+/* Initial firework/base particle properties */
 final int MIN_INITIAL_SIDEWAYS_FORCE = -1;
 final int MAX_INITIAL_SIDEWAYS_FORCE = 1;
 final int MIN_INITIAL_UPWARDS_FORCE = -10;
 final int MAX_INITIAL_UPWARDS_FORCE = -30;
+final int INITIAL_PARTICLE_INTERVAL_MS = 2000; 
+final float INITIAL_PARTICLE_GRAVITY = 0.03;
 
-/* Base particle properties */ 
+/* Random particle properties */
+final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2;
+final int RANDOM_PARTICLE_LIFESPAN = 125;
+final float RANDOM_PARTICLE_SIZE = 2.5;
+final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;
 
 // Internal variables
 ParticleSystem system = new ParticleSystem();
@@ -89,7 +96,7 @@ void draw()
     if (bursting) {
       interval = millis() + 500;  
     } else {
-      interval = millis() + 2000;  
+      interval = millis() + INITIAL_PARTICLE_INTERVAL_MS;  
     }
   }
 }
@@ -148,7 +155,7 @@ class ParticleSystem
       Particle p = i.next();
       
       // Apply gravity
-      p.applyForce(new PVector(0, GRAVITY));
+      p.applyForce(new PVector(0, INITIAL_PARTICLE_GRAVITY));
       
       // Move particle position
       p.move();
@@ -322,11 +329,6 @@ class ParticleSystem
         h.display();
       }
     }
-    
-    // Add generated particles to main particle update list
-    for (int x = 0; x < SplitterParticlesToAdd.size(); x++) {
-      SplitterParticles.add(SplitterParticlesToAdd.get(x));  
-    }
   }
 }
 
@@ -428,20 +430,20 @@ class RandomMovementParticle extends Particle
   {
     super(p);  
     
-    this.limit = 2;
+    this.limit = RANDOM_PARTICLE_VELOCITY_LIMIT;
     this.c = color(random(150, 255), 50, random(150, 255));
     this.target = color(50, random(150, 255), random(0, 150));
     this.subParticle = true;
     this.applyForce(PVector.random2D());
-    this.lifespan = 125;
-    this.size = 2.5;
+    this.lifespan = RANDOM_PARTICLE_LIFESPAN;
+    this.size = RANDOM_PARTICLE_SIZE;
   }
   void display()
   {
-    fill(lerpColor(c, target, lerpIteration), map(lifespan, 0, 125, 0, 255));
+    fill(lerpColor(c, target, lerpIteration), map(lifespan, 0, RANDOM_PARTICLE_LIFESPAN, 0, 255));
     ellipse(pos.x, pos.y, size, size);
     
-    lerpIteration += 0.01;
+    lerpIteration += RANDOM_PARTICLE_COLOUR_LERP_AMOUNT;
   }
 }
 

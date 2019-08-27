@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////////////
-///                                  Choasphere                                    ///
+///                                  Bayblade                                    ///
 /////////////////////////////////////////////////////////////////////////////////////
 ///                                                                               ///
 /// Written by Matthew Carney (1st Aug 2019)                                      ///
@@ -22,7 +22,7 @@ void setup()
   for (int i = 0; i < ORBIT_COUNT; i++) {
     orbits_x[i] = (int) random(10, 500);   
     orbits_y[i] = (int) random(10, 500);
-    colors[i] = color(random(255), random(150),random(150));//color(0, random(255), random(255)); //color(random(200), random(255), random(150));//
+    colors[i] = color(0, random(255), random(255)); //color(random(200), random(255), random(150));//
     angles[i] = (int) random(0, 360);
   }
 }
@@ -33,6 +33,7 @@ void draw()
   noStroke();
   fill(0, 20);
   rect(0, 0, width, height);
+  //background(0);
   
   // Cap the angles at 360 degrees, if over reset back to 0
   for (int x = 0; x < ORBIT_COUNT; x++) {
@@ -54,11 +55,11 @@ void draw()
     fill(colors[c]);
     
     // We achieve the effect by drawing a bunch of uneven ovals at different rates
-    ellipse(sin(radians(angles[c])) * orbits_x[c], cos(radians(angles[c])) * orbits_y[c], 4, 4);
+    ellipse(sin(radians(angles[c] * 2)) * orbits_x[c], cos(radians(angles[c])) * orbits_x[c], 4, 4);
     //point(sin(radians(i)) * orbits[c], cos(radians(i)) * orbits[c]);
     //ellipse(sin(radians(i)) * orbits[c], cos(radians(i)) * orbits_x[c], 4, 4);
     //ellipse(sin(radians(i)) * orbits[c], cos(radians(i)) * orbits[c], 4, 4);
   }
-  
+  println((int)map(mouseX, 0, width, 0, 15));
   popMatrix();
 }

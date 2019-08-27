@@ -224,6 +224,7 @@ class ParticleSystem
       for (int x = 0; x < this.baseParticlesBuffer.size(); x++) {
         this.baseParticles.add(this.baseParticlesBuffer.get(x));
       }
+      this.baseParticlesBuffer.clear();
     }
   }
   

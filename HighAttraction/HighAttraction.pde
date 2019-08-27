@@ -1,8 +1,10 @@
-final int PARTICLE_COUNT = 10000;
+final int PARTICLE_COUNT = 5000;
 
 PVector[] pos = new PVector[PARTICLE_COUNT];
 PVector[] acc = new PVector[PARTICLE_COUNT]; // Remove this, we don't use it here
 PVector[] vel = new PVector[PARTICLE_COUNT];
+
+Boolean clicked = false;
 
 // The trick is store structures of arrays as opposed to arrays of structures.
 
@@ -28,7 +30,7 @@ void setup()
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x] = new PVector(random(0, width), random(0, height));
-    vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
+    vel[x] = new PVector(random(-0.5, 0.5), random(-0.5, 0.5));//5);
     acc[x] = new PVector(0, 0);
   }
   
@@ -42,7 +44,7 @@ void draw()
 {
   //background(0);
   noStroke();
-  fill(0, 20);
+  fill(0, 60);
   rect(0, 0, width, height);
   
   // Act on each array seperately as well, otherwise you are still mixing and matching
@@ -63,12 +65,20 @@ void draw()
   }
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
-    PVector f = PVector.sub(center, pos[x]); // accessing pos here, bad!
-    f.normalize();
-    f.mult(0.01);
-    acc[x] = f;
+    if (pos[x].dist(new PVector(mouseX, mouseY)) < 50) // accessing pos here, bad!
+    {
+      
     
-    //acc[x].mult(0);
+      PVector f = PVector.sub(new PVector(mouseX, mouseY), pos[x]); 
+      f.normalize();
+      f.mult(0.11);
+      acc[x] = f;
+    }
+    else
+    {
+    
+    acc[x].mult(0);
+    }
   }
   
   fill(255);
@@ -84,4 +94,9 @@ void draw()
   }
   
   println("fps: " + frameRate);
+}
+
+void mousePressed()
+{
+  
 }

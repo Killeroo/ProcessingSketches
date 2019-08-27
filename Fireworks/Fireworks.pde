@@ -6,72 +6,79 @@ final float GRAVITY = 0.03; //0.05
 // -------
 // Must:
 // -> Final polish, comments and efficientsy pass
-// -> Randomise speed of particles (floaters, more powow to explosion)
-// -> Dynamic Emission Generation
-//    +> Rename emission function
-// -> Clean the code
-//    +> Add comments and seperators (DONE)
-//    +> Move constants to start (IN-PROGRESS)
-//    +> Rename particles (SparklingParticle -> SparklingParticleParticle) (DONE)
-//    +> Add explanation to what each particle does (DONE)
-//    +> Cleanup base particle class (DONE)
-// -> Better firework scatter patterns, dynamically change firerate (DONE)
 // -> Mouse click fire firework
 
 // Should:
 // -> Capitalise function and public variable names 
 // -> Randomised particle gravity, speed and size of particle
+// -> Splitter particle gravity switch
 
 /* General simultation options */
 final boolean ENABLE_EXPLOSION_FLASHES = false;
-final int BACKGROUND_COLOUR = 0;
-final int MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
+final int     BACKGROUND_COLOUR = 0;
+final int     MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
 
 /* Initial firework/base particle properties */
-final int MIN_INITIAL_SIDEWAYS_FORCE = -1;
-final int MAX_INITIAL_SIDEWAYS_FORCE = 1;
-final int MIN_INITIAL_UPWARDS_FORCE = -10;
-final int MAX_INITIAL_UPWARDS_FORCE = -30;
-final int INITIAL_PARTICLE_INTERVAL_MS = 2000; 
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -1;
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 1;
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN = -10;
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -30;
+final int   INITIAL_PARTICLE_INTERVAL_MS = 2000; 
 final float INITIAL_PARTICLE_GRAVITY = 0.03;
 
-/* Random particle properties */
+/* Particle Properties */
 final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2; // Lower = lower speed
-final int RANDOM_PARTICLE_LIFESPAN = 125;
+final int   RANDOM_PARTICLE_LIFESPAN = 125;
 final float RANDOM_PARTICLE_SIZE = 2.5;
 final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01; // High = quicker colour transition
 
-// TODO: Add gravity
-// TODO: Check
-// TODO: Move MIN and MAX to end
-final float MIN_FALLING_PARTICLE_INITIAL_ACCELERATION = 3;
-final float MAX_FALLING_PARTICLE_INITIAL_ACCELERATION = 6;
-final float MIN_FALLING_PARTICLE_INITIAL_FORCE = 2;
-final float MAX_FALLING_PARTICLE_INITIAL_FORCE = 6;
-final int FALLING_PARTICLE_SIZE = 1;
-final int FALLING_PARTICLE_LIFESPAN = 250;
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;
+final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;
+final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;
+final int   FALLING_PARTICLE_SIZE = 1;
+final int   FALLING_PARTICLE_LIFESPAN = 250;
+final float FALLING_PARTICLE_GRAVITY = 0.03;
 
-final float MIN_FLOATING_PARTICLE_VELOCITY_LIMIT = 0.5;
-final float MAX_FLOATING_PARTICLE_VELOCITY_LIMIT = 2;
-final int FLOATING_PARTICLE_LIFESPAN = 175;
-final int FLOATING_PARTICLE_SIZE = 3;
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MIN = 0.5;
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MAX = 2;
+final int   FLOATING_PARTICLE_LIFESPAN = 175;
+final int   FLOATING_PARTICLE_SIZE = 3;
 
-final float MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY =  0.25;
-final float MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY = 0.5;
-final int SPARKLING_PARTICLE_LIFESPAN = 315;
-final int SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;
-final float MIN_SPARKLING_PARTICLE_SPARKLE_SIZE = 1;
-final float MAX_SPARKLING_PARTICLE_SPARKLE_SIZE = 3;
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN =  0.25;
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX = 0.5;
+final int   SPARKLING_PARTICLE_LIFESPAN = 315;
+final int   SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;
+final float SPARKLING_PARTICLE_SPARKLE_SIZE_MIN = 1;
+final float SPARKLING_PARTICLE_SPARKLE_SIZE_MAX = 3;
+final float SPARKLING_PARTICLE_GRAVITY = 0.025;
 
-final float MIN_TWISTING_PARTICLE_INITIAL_VELOCITY = 0.5;
-final float MAX_TWISTING_PARTICLE_INITIAL_VELOCITY = 1;
-final float MIN_TWISTING_PARTICLE_ROTATION = 50;
-final float MAX_TWISTING_PARTICLE_ROTATION = 150;
-final float MIN_TWISTING_PARTICLE_VELOCITY_LIMIT = 1;
-final float MAX_TWISTING_PARTICLE_VELOCITY_LIMIT = 2;
-final int TWISTING_PARTICLE_LIFESPAN = 250;
-final int TWISTING_PARTICLE_SIZE = 2;
-final int TWISTING_PARTICLE_SEPERATION = 5;
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;
+final float TWISTING_PARTICLE_ROTATION_MIN = 50;
+final float TWISTING_PARTICLE_ROTATION_MAX = 150;
+final float TWISTING_PARTICLE_VELOCITY_LIMIT_MIN = 1;
+final float TWISTING_PARTICLE_VELOCITY_LIMIT_MAX = 2;
+final int   TWISTING_PARTICLE_LIFESPAN = 250;
+final int   TWISTING_PARTICLE_SIZE = 2;
+final int   TWISTING_PARTICLE_SEPERATION = 5;
+final float TWISTING_PARTICLE_GRAVITY = 0.01;
+
+final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;
+final float TRAILING_PARTICLE_LIFESPAN_MAX = 350;
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN = 1;
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX = 2;
+final float TRAILING_PARTICLE_GRAVITY = 0.005;
+
+final int   SPLITTER_PARTICLE_LIFESPAN = 150;
+final int   SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT = 75;
+final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;
+final float SPLITTER_PARTICLE_GRAVITY = 0.03;
+
+final float EXPLOSION_HALO_THICKNESS = 1;
+final float EXPLOSION_HALO_SPEED_MIN = 1;
+final float EXPLOSION_HALO_SPEED_MAX = 4;
+final int   EXPLOSION_HALO_LIFESPAN = 150;
 
 // Internal variables
 ParticleSystem system = new ParticleSystem();
@@ -104,10 +111,14 @@ void draw()
     Particle p = new Particle(new PVector(width/2, height));
     
     // Apply some initial upward force
-    p.applyForce(new PVector(random(MIN_INITIAL_SIDEWAYS_FORCE, MAX_INITIAL_SIDEWAYS_FORCE), random(MIN_INITIAL_UPWARDS_FORCE, MAX_INITIAL_UPWARDS_FORCE)));
+    println(new PVector(
+      random(INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN, INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX), 
+      random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
+    ));
+    //p.applyForce();
     
     // Add to particle system
-    system.particles.add(p);
+    //system.baseParticles.add(p);
     
     // Interval between initial fireworks
     if (bursting) {
@@ -120,6 +131,23 @@ void draw()
 
 void mousePressed()
 {
+  PVector target = new PVector(mouseX, mouseY);
+  PVector base = new PVector(width/2, height);
+  
+  PVector force = new PVector(
+    target.sub(base).normalize().mult(5).x, 
+    random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
+  );
+  println(force);
+  
+  // Lock buffer so we don't get an access exception from adding to the list
+  // when we are accessing it in the ParticleSystem
+  synchronized(system.baseParticlesBuffer) {
+    Particle p = new Particle(base);
+    p.applyForce(force); 
+    system.baseParticlesBuffer.add(p);
+  }
+  
   bursting = !bursting;  
 }
 
@@ -131,7 +159,8 @@ void mousePressed()
 class ParticleSystem
 {
   // Initial particles
-  ArrayList<Particle> particles = new ArrayList<Particle>();
+  ArrayList<Particle> baseParticles = new ArrayList<Particle>();
+  ArrayList<Particle> baseParticlesBuffer = new ArrayList<Particle>(); 
   
   // All sub particles
   ArrayList<RandomMovementParticle> RandomMovementParticles = new ArrayList<RandomMovementParticle>();
@@ -141,7 +170,7 @@ class ParticleSystem
   ArrayList<SparklingParticle> SparklingParticles = new ArrayList<SparklingParticle>();
   ArrayList<TrailingParticle> TrailingParticles = new ArrayList<TrailingParticle>();
   ArrayList<SplitterParticle> SplitterParticles = new ArrayList<SplitterParticle>();
-  ArrayList<SplitterParticle> SplitterParticlesToAdd = new ArrayList<SplitterParticle>();
+  ArrayList<SplitterParticle> SplitterParticlesBuffer = new ArrayList<SplitterParticle>();
   
   // Explosions rings
   ArrayList<Halo> Halos = new ArrayList<Halo>();
@@ -167,7 +196,7 @@ class ParticleSystem
   {
     // We use an interator so we can modify the contents of the list as we
     // go through it
-    Iterator<Particle> i = particles.iterator();
+    Iterator<Particle> i = baseParticles.iterator();
     while (i.hasNext()) {
       Particle p = i.next();
       
@@ -188,6 +217,12 @@ class ParticleSystem
         i.remove();  
       } else {
         p.display();
+      }
+    }
+    
+    synchronized(this.baseParticlesBuffer) {
+      for (int x = 0; x < this.baseParticlesBuffer.size(); x++) {
+        this.baseParticles.add(this.baseParticlesBuffer.get(x));
       }
     }
   }
@@ -234,7 +269,7 @@ class ParticleSystem
     while (i.hasNext()) {
       FallingParticle f = i.next();
       
-      f.applyForce(new PVector(0, GRAVITY));
+      f.applyForce(new PVector(0, FALLING_PARTICLE_GRAVITY));
       f.move();
       
       if (f.isDead()) {
@@ -251,7 +286,7 @@ class ParticleSystem
     while (i.hasNext()) {
       TwistingParticle t = i.next();
       
-      t.applyForce(new PVector(0, 0.01)); 
+      t.applyForce(new PVector(0, TWISTING_PARTICLE_GRAVITY)); 
       t.move();
       
       if (t.isDead()) {
@@ -270,7 +305,7 @@ class ParticleSystem
       
       if (s.lifespan < 225) {
         
-        s.applyForce(new PVector(0, 0.025));
+        s.applyForce(new PVector(0, SPARKLING_PARTICLE_GRAVITY));
         s.vel.limit(0.5);
       }
       
@@ -292,7 +327,7 @@ class ParticleSystem
     while (i.hasNext()) {
       TrailingParticle t = i.next();
       
-      t.applyForce(new PVector(0, 0.005));
+      t.applyForce(new PVector(0, TRAILING_PARTICLE_GRAVITY));
       t.move();
       
       if (t.isDead()) {
@@ -309,7 +344,7 @@ class ParticleSystem
     while (i.hasNext()) {
       SplitterParticle t = i.next();
       
-      t.applyForce(new PVector(0, GRAVITY));
+      t.applyForce(new PVector(0, SPLITTER_PARTICLE_GRAVITY));
       t.move();
       
       if (t.isDead()) {
@@ -325,11 +360,11 @@ class ParticleSystem
     }
     
     // Add generated particles to main particle update list
-    for (int x = 0; x < SplitterParticlesToAdd.size(); x++) {
-      SplitterParticles.add(SplitterParticlesToAdd.get(x));  
+    for (int x = 0; x < SplitterParticlesBuffer.size(); x++) {
+      SplitterParticles.add(SplitterParticlesBuffer.get(x));  
     }
     
-    SplitterParticlesToAdd.clear();
+    SplitterParticlesBuffer.clear();
   }
   
   void updateHalos()
@@ -475,11 +510,11 @@ class FallingParticle extends Particle
     super(p);
     
     // Create initial velocity in random directions upon spawning
-    this.vel = PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_ACCELERATION, MAX_FALLING_PARTICLE_INITIAL_ACCELERATION));
-    this.acc = PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_ACCELERATION, MAX_FALLING_PARTICLE_INITIAL_ACCELERATION));
+    this.vel = PVector.random2D().limit(random(FALLING_PARTICLE_INITIAL_ACCELERATION_MIN, FALLING_PARTICLE_INITIAL_ACCELERATION_MAX));
+    this.acc = PVector.random2D().limit(random(FALLING_PARTICLE_INITIAL_ACCELERATION_MIN, FALLING_PARTICLE_INITIAL_ACCELERATION_MAX));
     this.c = color(random(0, 200), random(25, 100), random(0, 255));
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_FORCE, MAX_FALLING_PARTICLE_INITIAL_FORCE)));
+    this.applyForce(PVector.random2D().limit(random(FALLING_PARTICLE_INITIAL_FORCE_MIN, FALLING_PARTICLE_INITIAL_FORCE_MAX)));
     this.lifespan = FALLING_PARTICLE_LIFESPAN;
     this.size = FALLING_PARTICLE_SIZE;
   }
@@ -499,7 +534,7 @@ class FloatingParticle extends Particle
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.limit = random(MIN_FLOATING_PARTICLE_VELOCITY_LIMIT, MAX_FLOATING_PARTICLE_VELOCITY_LIMIT);
+    this.limit = random(FLOATING_PARTICLE_VELOCITY_LIMIT_MIN, FLOATING_PARTICLE_VELOCITY_LIMIT_MAX);
     this.lifespan = FLOATING_PARTICLE_LIFESPAN;
     this.size = FLOATING_PARTICLE_SIZE;
   }
@@ -518,8 +553,8 @@ class SparklingParticle extends Particle
     
     this.lifespan = SPARKLING_PARTICLE_LIFESPAN;
     this.subParticle = true;
-    this.vel = PVector.random2D().limit(random(MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY, MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY));
-    this.acc = PVector.random2D().limit(random(MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY, MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY));
+    this.vel = PVector.random2D().limit(random(SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN, SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX));
+    this.acc = PVector.random2D().limit(random(SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN, SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX));
     //this.applyForce(PVector.random2D());
     this.r = _r;
     this.g = _g;
@@ -532,16 +567,12 @@ class SparklingParticle extends Particle
     ellipse(
       random(pos.x - (SPARKLING_PARTICLE_SPARKLE_OFFSET), pos.x + (SPARKLING_PARTICLE_SPARKLE_OFFSET)),
       random(pos.y - (SPARKLING_PARTICLE_SPARKLE_OFFSET), pos.y + (SPARKLING_PARTICLE_SPARKLE_OFFSET)), 
-      random(MIN_SPARKLING_PARTICLE_SPARKLE_SIZE, MAX_SPARKLING_PARTICLE_SPARKLE_SIZE), 
-      random(MIN_SPARKLING_PARTICLE_SPARKLE_SIZE, MAX_SPARKLING_PARTICLE_SPARKLE_SIZE)
+      random(SPARKLING_PARTICLE_SPARKLE_SIZE_MIN, SPARKLING_PARTICLE_SPARKLE_SIZE_MAX), 
+      random(SPARKLING_PARTICLE_SPARKLE_SIZE_MIN, SPARKLING_PARTICLE_SPARKLE_SIZE_MAX)
     );
   }
 }
 
-final float MIN_TRAILING_PARTICLE_LIFESPAN = 275;
-final float MAX_TRAILING_PARTICLE_LIFESPAN = 350;
-final float MIN_TRAILING_PARTICLE_FORCE_MULTIPLIER = 1;
-final float MAX_TRAILING_PARTICLE_FORCE_MULTIPLIER = 2;
 // Trailing particles start off like Floating particles; with no gravity and a fixed
 // velocity but after a certain period gravity is applied to them till their lifespan reaches 0
 class TrailingParticle extends Particle
@@ -550,9 +581,9 @@ class TrailingParticle extends Particle
   {
     super(p);
     
-    this.lifespan = (int) random(MIN_TRAILING_PARTICLE_LIFESPAN, MAX_TRAILING_PARTICLE_LIFESPAN);
+    this.lifespan = (int) random(TRAILING_PARTICLE_LIFESPAN_MIN, TRAILING_PARTICLE_LIFESPAN_MAX);
     this.subParticle = true;
-    this.applyForce(PVector.random2D().mult(random(MIN_TRAILING_PARTICLE_FORCE_MULTIPLIER, MAX_TRAILING_PARTICLE_FORCE_MULTIPLIER)));
+    this.applyForce(PVector.random2D().mult(random(TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN, TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX)));
   }
 }
 
@@ -567,13 +598,13 @@ class TwistingParticle extends Particle
   public TwistingParticle(PVector p)
   {
     super(p);
-    this.vel = PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_INITIAL_VELOCITY, MAX_TWISTING_PARTICLE_INITIAL_VELOCITY));
-    this.acc = PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_INITIAL_VELOCITY, MAX_TWISTING_PARTICLE_INITIAL_VELOCITY));
+    this.vel = PVector.random2D().limit(random(TWISTING_PARTICLE_INITIAL_VELOCITY_MIN, TWISTING_PARTICLE_INITIAL_VELOCITY_MAX));
+    this.acc = PVector.random2D().limit(random(TWISTING_PARTICLE_INITIAL_VELOCITY_MIN, TWISTING_PARTICLE_INITIAL_VELOCITY_MAX));
     this.c = color(random(25, 255), random(75, 125), 0);
-    this.rot = random(MIN_TWISTING_PARTICLE_ROTATION, MAX_TWISTING_PARTICLE_ROTATION);
+    this.rot = random(TWISTING_PARTICLE_ROTATION_MIN, TWISTING_PARTICLE_ROTATION_MAX);
     
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_VELOCITY_LIMIT, MAX_TWISTING_PARTICLE_VELOCITY_LIMIT)));
+    this.applyForce(PVector.random2D().limit(random(TWISTING_PARTICLE_VELOCITY_LIMIT_MIN, TWISTING_PARTICLE_VELOCITY_LIMIT_MAX)));
     this.lifespan = TWISTING_PARTICLE_LIFESPAN;
     this.size = TWISTING_PARTICLE_SIZE;
   }
@@ -605,7 +636,7 @@ class SplitterParticle extends Particle
   {
     super(p);
     
-    this.lifespan = 150;
+    this.lifespan = SPLITTER_PARTICLE_LIFESPAN;
     this.acc = PVector.random2D();
   }
   
@@ -616,7 +647,7 @@ class SplitterParticle extends Particle
     acc.mult(0);
     
     // Explode after an arbitary lifespan
-    if (lifespan < 75 && !exploded) {
+    if (lifespan < SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT && !exploded) {
       explode();
     }
     
@@ -633,11 +664,11 @@ class SplitterParticle extends Particle
     
     // Spawn 5 new splitter particles at our position
     // (lower the iterations so we know when to stop)
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT; i++) {
       SplitterParticle s = new SplitterParticle(pos);
       s.iterations = this.iterations - 1;
       s.c = this.c;
-      system.SplitterParticlesToAdd.add(s);
+      system.SplitterParticlesBuffer.add(s);
     }
     
     // Signal for removal
@@ -661,15 +692,15 @@ class Halo
 {
   color c;
   PVector pos;
-  float size = 1;
+  float size = EXPLOSION_HALO_THICKNESS;
   float speed;
-  int lifespan = 150;
+  int lifespan = EXPLOSION_HALO_LIFESPAN;
   
   Halo(PVector start, color colour)
   {
     pos = start;
     c = colour;
-    speed = random(1, 4);
+    speed = random(EXPLOSION_HALO_SPEED_MIN, EXPLOSION_HALO_SPEED_MAX);
   }
   
   void update()
@@ -680,7 +711,7 @@ class Halo
   
   void display()
   { 
-    stroke(c, map(lifespan, 0, 150, 0, 255));
+    stroke(c, map(lifespan, 0, EXPLOSION_HALO_LIFESPAN, 0, 255));
     noFill();
     ellipse(pos.x, pos.y, size, size);
     noStroke();

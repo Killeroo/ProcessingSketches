@@ -8,9 +8,7 @@ final float GRAVITY = 0.03; //0.05
 // -> Final polish, comments and efficientsy pass
 // -> Randomise speed of particles (floaters, more powow to explosion)
 // -> Dynamic Emission Generation
-//    +> Rip out generic Emissions (DONE)
 //    +> Rename emission function
-//    +> Keep some full Emissions (DONE)
 // -> Clean the code
 //    +> Add comments and seperators (DONE)
 //    +> Move constants to start (IN-PROGRESS)
@@ -18,24 +16,11 @@ final float GRAVITY = 0.03; //0.05
 //    +> Add explanation to what each particle does (DONE)
 //    +> Cleanup base particle class (DONE)
 // -> Better firework scatter patterns, dynamically change firerate (DONE)
+// -> Mouse click fire firework
 
 // Should:
 // -> Capitalise function and public variable names 
-// -> Can you clean up the ParticleSystem updaters? (DONE)
 // -> Randomised particle gravity, speed and size of particle
-// -> Stop initial upward force being default behaviour (DONE)
-// -> Slow down floater particles over lifespan like an actual firework (DONE)
-
-// Nice to have:
-// -> New particles:
-//    +> Octopus wandering (WON'T ADD)
-//    +> Explosions within explosions (DONE)
-// -> Make the explosion code less hacky (DONE)
-// -> Add functions to generate colour relations of base colours (WON'T ADD)
-//    +> Convert HSL then work out colour compliments etc
-//    +> Find out how the colour wheels do it
-//    +> Experiment with HSL and changing lightnes over lifespan
-//    (https://medium.com/@MateMarschalko/dynamic-colour-palettes-with-sass-and-hsl-805b8bbef758)
 
 /* General simultation options */
 final boolean ENABLE_EXPLOSION_FLASHES = false;
@@ -51,10 +36,42 @@ final int INITIAL_PARTICLE_INTERVAL_MS = 2000;
 final float INITIAL_PARTICLE_GRAVITY = 0.03;
 
 /* Random particle properties */
-final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2;
+final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2; // Lower = lower speed
 final int RANDOM_PARTICLE_LIFESPAN = 125;
 final float RANDOM_PARTICLE_SIZE = 2.5;
-final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;
+final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01; // High = quicker colour transition
+
+// TODO: Add gravity
+// TODO: Check
+// TODO: Move MIN and MAX to end
+final float MIN_FALLING_PARTICLE_INITIAL_ACCELERATION = 3;
+final float MAX_FALLING_PARTICLE_INITIAL_ACCELERATION = 6;
+final float MIN_FALLING_PARTICLE_INITIAL_FORCE = 2;
+final float MAX_FALLING_PARTICLE_INITIAL_FORCE = 6;
+final int FALLING_PARTICLE_SIZE = 1;
+final int FALLING_PARTICLE_LIFESPAN = 250;
+
+final float MIN_FLOATING_PARTICLE_VELOCITY_LIMIT = 0.5;
+final float MAX_FLOATING_PARTICLE_VELOCITY_LIMIT = 2;
+final int FLOATING_PARTICLE_LIFESPAN = 175;
+final int FLOATING_PARTICLE_SIZE = 3;
+
+final float MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY =  0.25;
+final float MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY = 0.5;
+final int SPARKLING_PARTICLE_LIFESPAN = 315;
+final int SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;
+final float MIN_SPARKLING_PARTICLE_SPARKLE_SIZE = 1;
+final float MAX_SPARKLING_PARTICLE_SPARKLE_SIZE = 3;
+
+final float MIN_TWISTING_PARTICLE_INITIAL_VELOCITY = 0.5;
+final float MAX_TWISTING_PARTICLE_INITIAL_VELOCITY = 1;
+final float MIN_TWISTING_PARTICLE_ROTATION = 50;
+final float MAX_TWISTING_PARTICLE_ROTATION = 150;
+final float MIN_TWISTING_PARTICLE_VELOCITY_LIMIT = 1;
+final float MAX_TWISTING_PARTICLE_VELOCITY_LIMIT = 2;
+final int TWISTING_PARTICLE_LIFESPAN = 250;
+final int TWISTING_PARTICLE_SIZE = 2;
+final int TWISTING_PARTICLE_SEPERATION = 5;
 
 // Internal variables
 ParticleSystem system = new ParticleSystem();
@@ -416,6 +433,8 @@ class Particle
 // application of gravity etc are done in the ParticleSystem, under the corresponding 
 // function for updating the particular particle type.
 // For example, RandomMovementParticles are updated in ParticleSystem.updateRandomMovementParticle()
+//
+// NOTE ON COLOURS: Most colours are actually controlled in Emission functions
 //////////////////////////////////////////////////////////////////////////////////////
 
 // As the name suggests, these particles have force applied to them randomly meaning they have 
@@ -456,13 +475,13 @@ class FallingParticle extends Particle
     super(p);
     
     // Create initial velocity in random directions upon spawning
-    this.vel = PVector.random2D().limit(random(3,6));
-    this.acc = PVector.random2D().limit(random(3,6));
+    this.vel = PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_ACCELERATION, MAX_FALLING_PARTICLE_INITIAL_ACCELERATION));
+    this.acc = PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_ACCELERATION, MAX_FALLING_PARTICLE_INITIAL_ACCELERATION));
     this.c = color(random(0, 200), random(25, 100), random(0, 255));
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(2,6)));
-    this.lifespan = 250;
-    this.size = 1;
+    this.applyForce(PVector.random2D().limit(random(MIN_FALLING_PARTICLE_INITIAL_FORCE, MAX_FALLING_PARTICLE_INITIAL_FORCE)));
+    this.lifespan = FALLING_PARTICLE_LIFESPAN;
+    this.size = FALLING_PARTICLE_SIZE;
   }
 }
 
@@ -470,7 +489,7 @@ class FallingParticle extends Particle
 // velocity that doesn't change over time, they are also not affected by gravity
 class FloatingParticle extends Particle
 {
-  float limit = 2;
+  float limit;
   
   public FloatingParticle(PVector p)
   {
@@ -480,8 +499,9 @@ class FloatingParticle extends Particle
     this.subParticle = true;
     this.acc = PVector.random2D();
     this.applyForce(PVector.random2D());
-    this.lifespan = 175;
-    this.size = 3;
+    this.limit = random(MIN_FLOATING_PARTICLE_VELOCITY_LIMIT, MAX_FLOATING_PARTICLE_VELOCITY_LIMIT);
+    this.lifespan = FLOATING_PARTICLE_LIFESPAN;
+    this.size = FLOATING_PARTICLE_SIZE;
   }
 }
 
@@ -496,11 +516,11 @@ class SparklingParticle extends Particle
   {
     super(p);
     
-    this.lifespan = 315;
+    this.lifespan = SPARKLING_PARTICLE_LIFESPAN;
     this.subParticle = true;
-    this.vel = PVector.random2D().limit(random(0.25, 0.5));
-    this.acc = PVector.random2D().limit(random(0.25, 0.5));
-    
+    this.vel = PVector.random2D().limit(random(MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY, MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY));
+    this.acc = PVector.random2D().limit(random(MIN_SPARKLING_PARTICLE_INITIAL_VELOCITY, MAX_SPARKLING_PARTICLE_INITIAL_VELOCITY));
+    //this.applyForce(PVector.random2D());
     this.r = _r;
     this.g = _g;
     this.b = _b;
@@ -509,10 +529,19 @@ class SparklingParticle extends Particle
   void sparkle()
   {
     fill(r, b, g, lifespan);
-    ellipse(random(pos.x-(5), pos.x+(5)),random(pos.y-(5),pos.y+(5)), random(1,3), random(1,3));
+    ellipse(
+      random(pos.x - (SPARKLING_PARTICLE_SPARKLE_OFFSET), pos.x + (SPARKLING_PARTICLE_SPARKLE_OFFSET)),
+      random(pos.y - (SPARKLING_PARTICLE_SPARKLE_OFFSET), pos.y + (SPARKLING_PARTICLE_SPARKLE_OFFSET)), 
+      random(MIN_SPARKLING_PARTICLE_SPARKLE_SIZE, MAX_SPARKLING_PARTICLE_SPARKLE_SIZE), 
+      random(MIN_SPARKLING_PARTICLE_SPARKLE_SIZE, MAX_SPARKLING_PARTICLE_SPARKLE_SIZE)
+    );
   }
 }
 
+final float MIN_TRAILING_PARTICLE_LIFESPAN = 275;
+final float MAX_TRAILING_PARTICLE_LIFESPAN = 350;
+final float MIN_TRAILING_PARTICLE_FORCE_MULTIPLIER = 1;
+final float MAX_TRAILING_PARTICLE_FORCE_MULTIPLIER = 2;
 // Trailing particles start off like Floating particles; with no gravity and a fixed
 // velocity but after a certain period gravity is applied to them till their lifespan reaches 0
 class TrailingParticle extends Particle
@@ -521,9 +550,9 @@ class TrailingParticle extends Particle
   {
     super(p);
     
-    this.lifespan = (int) random(275, 350);
+    this.lifespan = (int) random(MIN_TRAILING_PARTICLE_LIFESPAN, MAX_TRAILING_PARTICLE_LIFESPAN);
     this.subParticle = true;
-    this.applyForce(PVector.random2D().mult(random(1, 2)));//1.5));
+    this.applyForce(PVector.random2D().mult(random(MIN_TRAILING_PARTICLE_FORCE_MULTIPLIER, MAX_TRAILING_PARTICLE_FORCE_MULTIPLIER)));
   }
 }
 
@@ -535,19 +564,18 @@ class TwistingParticle extends Particle
   float theta;
   float rot;
  
-  // spiral off (affected by gravity)
   public TwistingParticle(PVector p)
   {
     super(p);
-    this.vel = PVector.random2D().limit(random(0.5, 1));
-    this.acc = PVector.random2D().limit(random(0.5, 1));
+    this.vel = PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_INITIAL_VELOCITY, MAX_TWISTING_PARTICLE_INITIAL_VELOCITY));
+    this.acc = PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_INITIAL_VELOCITY, MAX_TWISTING_PARTICLE_INITIAL_VELOCITY));
     this.c = color(random(25, 255), random(75, 125), 0);
-    this.rot = random(50, 150);
+    this.rot = random(MIN_TWISTING_PARTICLE_ROTATION, MAX_TWISTING_PARTICLE_ROTATION);
     
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(1,2)));
-    this.lifespan = 250;
-    this.size = 2;
+    this.applyForce(PVector.random2D().limit(random(MIN_TWISTING_PARTICLE_VELOCITY_LIMIT, MAX_TWISTING_PARTICLE_VELOCITY_LIMIT)));
+    this.lifespan = TWISTING_PARTICLE_LIFESPAN;
+    this.size = TWISTING_PARTICLE_SIZE;
   }
   
   void display()
@@ -559,8 +587,8 @@ class TwistingParticle extends Particle
     translate(pos.x, pos.y);
     rotate(theta);
     theta += TWO_PI/rot;
-    ellipse(5, 5, size, size);
-    ellipse(-5, -5, size, size);
+    ellipse(TWISTING_PARTICLE_SEPERATION, TWISTING_PARTICLE_SEPERATION, size, size);
+    ellipse(-TWISTING_PARTICLE_SEPERATION, -TWISTING_PARTICLE_SEPERATION, size, size);
     popMatrix();
   }
 }

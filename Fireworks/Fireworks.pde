@@ -15,76 +15,88 @@ final float GRAVITY = 0.03; //0.05
 
 /* General simultation options */
 final boolean ENABLE_EXPLOSION_FLASHES = false;
-final int     BACKGROUND_COLOUR = 0;
+final int     BACKGROUND_COLOUR = 0; // 0 = black, 255 = white
 final int     MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
 
 /* Initial firework/base particle properties */
-final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -1;
-final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 1;
+final float INITIAL_PARTICLE_GRAVITY = 0.03;
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -2;
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 2;
 final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN = -10;
 final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -30;
-final int   INITIAL_PARTICLE_INTERVAL_MS = 2000; 
-final float INITIAL_PARTICLE_GRAVITY = 0.03;
+final int   INITIAL_PARTICLE_INTERVAL_MS_MIN = 1500; 
+final int   INITIAL_PARTICLE_INTERVAL_MS_MAX = 2000;
 
-/* Particle Properties */
-final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2; // Lower = lower speed
-final int   RANDOM_PARTICLE_LIFESPAN = 125;
-final float RANDOM_PARTICLE_SIZE = 2.5;
-final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01; // High = quicker colour transition
-
-final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;
-final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;
-final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;
-final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;
-final int   FALLING_PARTICLE_SIZE = 1;
-final int   FALLING_PARTICLE_LIFESPAN = 250;
-final float FALLING_PARTICLE_GRAVITY = 0.03;
-
-final float FLOATING_PARTICLE_VELOCITY_LIMIT_MIN = 0.5;
-final float FLOATING_PARTICLE_VELOCITY_LIMIT_MAX = 2;
-final int   FLOATING_PARTICLE_LIFESPAN = 175;
-final int   FLOATING_PARTICLE_SIZE = 3;
-
-final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN =  0.25;
-final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX = 0.5;
-final int   SPARKLING_PARTICLE_LIFESPAN = 315;
-final int   SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;
-final float SPARKLING_PARTICLE_SPARKLE_SIZE_MIN = 1;
-final float SPARKLING_PARTICLE_SPARKLE_SIZE_MAX = 3;
-final float SPARKLING_PARTICLE_GRAVITY = 0.025;
-
-final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;
-final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;
-final float TWISTING_PARTICLE_ROTATION_MIN = 50;
-final float TWISTING_PARTICLE_ROTATION_MAX = 150;
-final float TWISTING_PARTICLE_VELOCITY_LIMIT_MIN = 1;
-final float TWISTING_PARTICLE_VELOCITY_LIMIT_MAX = 2;
-final int   TWISTING_PARTICLE_LIFESPAN = 250;
-final int   TWISTING_PARTICLE_SIZE = 2;
-final int   TWISTING_PARTICLE_SEPERATION = 5;
-final float TWISTING_PARTICLE_GRAVITY = 0.01;
-
-final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;
-final float TRAILING_PARTICLE_LIFESPAN_MAX = 350;
-final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN = 1;
-final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX = 2;
-final float TRAILING_PARTICLE_GRAVITY = 0.005;
-
-final int   SPLITTER_PARTICLE_LIFESPAN = 150;
-final int   SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT = 75;
-final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;
-final float SPLITTER_PARTICLE_GRAVITY = 0.03;
-
+/* Explosion halo that eminates from some fireworks */
 final float EXPLOSION_HALO_THICKNESS = 1;
+final int   EXPLOSION_HALO_LIFESPAN = 150;
 final float EXPLOSION_HALO_SPEED_MIN = 1;
 final float EXPLOSION_HALO_SPEED_MAX = 4;
-final int   EXPLOSION_HALO_LIFESPAN = 150;
+
+/* Firework Particle Properties */
+/* There are 7 different types of particles used here.
+   Their properties can be modified below, have fun!
+   (Particle classes contain more info on how they act) */
+
+/* Random Particle */
+final int   RANDOM_PARTICLE_LIFESPAN = 125;                // Lower = fade faster, higher = last longer
+final float RANDOM_PARTICLE_SIZE = 2.5;                    // Higher = bigger particle
+final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2;            // Lower = lower speed
+final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;     // High = quicker colour transition
+
+/* Falling Particle */
+final int   FALLING_PARTICLE_SIZE = 1;                      // Higher = bigger particle
+final int   FALLING_PARTICLE_LIFESPAN = 250;                // Lower = fade faster, higher = last longer
+final float FALLING_PARTICLE_GRAVITY = 0.03;                // Lower = less gravity
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;  // Lower bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;  // Upper bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;         // Lower bound of initial force applied to particle
+final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;         // Upper bound of initial force applied to particle
+
+/* Floating Particle */
+final int   FLOATING_PARTICLE_SIZE = 3;                     // Higher = bigger particle
+final int   FLOATING_PARTICLE_LIFESPAN = 175;               // Lower = fade faster, higher = last longer
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MIN = 0.5;     // Lower bound used to generate initial particle velocity
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MAX = 2;       // Upper bound used to generate initial particle velocity
+
+/* Sparkling Particle */
+final int   SPARKLING_PARTICLE_LIFESPAN = 315;               // Lower = fade faster, higher = last longer
+final float SPARKLING_PARTICLE_GRAVITY = 0.025;              // Lower = less gravity
+final int   SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;           // Max distance sparkles will be drawn from particle position, higher = more sparkle spread
+final float SPARKLING_PARTICLE_SPARKLE_SIZE_MIN = 1;         // Lower bound for size of sparkles
+final float SPARKLING_PARTICLE_SPARKLE_SIZE_MAX = 3;         // Upper bound for size of sparkles
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN =  0.25; // Lower bound used to generate initial particle velocity
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX = 0.5;   // Upper bound used to generate initial particle velocity
+
+/* Twisting Particle */
+final int   TWISTING_PARTICLE_SIZE = 2;
+final float TWISTING_PARTICLE_GRAVITY = 0.01;
+final int   TWISTING_PARTICLE_LIFESPAN = 250;
+final int   TWISTING_PARTICLE_SEPERATION = 5;
+final float TWISTING_PARTICLE_ROTATION_MIN = 50;
+final float TWISTING_PARTICLE_ROTATION_MAX = 150;
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN = 1;
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX = 2;
+
+/* Trailing Particle */
+final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;
+final float TRAILING_PARTICLE_LIFESPAN_MAX = 350;
+final float TRAILING_PARTICLE_GRAVITY = 0.005;
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN = 1;
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX = 2;
+
+/* Splitter Particle */
+final int   SPLITTER_PARTICLE_LIFESPAN = 150;
+final float SPLITTER_PARTICLE_GRAVITY = 0.03;
+final int   SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT = 75;
+final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;
 
 // Internal variables
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
 boolean flashing = false;
-boolean bursting = false;
 
 void setup()
 {
@@ -111,21 +123,16 @@ void draw()
     Particle p = new Particle(new PVector(width/2, height));
     
     // Apply some initial upward force
-    println(new PVector(
+    p.applyForce(new PVector(
       random(INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN, INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX), 
       random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
     ));
-    //p.applyForce();
     
     // Add to particle system
-    //system.baseParticles.add(p);
+    system.baseParticles.add(p);
     
     // Interval between initial fireworks
-    if (bursting) {
-      interval = millis() + 500;  
-    } else {
-      interval = millis() + INITIAL_PARTICLE_INTERVAL_MS;  
-    }
+    interval = millis() + (int) random(INITIAL_PARTICLE_INTERVAL_MS_MIN, INITIAL_PARTICLE_INTERVAL_MS_MAX);  
   }
 }
 
@@ -136,9 +143,9 @@ void mousePressed()
   
   PVector force = new PVector(
     target.sub(base).normalize().mult(5).x, 
-    random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
+    target.sub(base).normalize().mult(10).y//random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
   );
-  println(force);
+  //println(force);
   
   // Lock buffer so we don't get an access exception from adding to the list
   // when we are accessing it in the ParticleSystem
@@ -147,8 +154,6 @@ void mousePressed()
     p.applyForce(force); 
     system.baseParticlesBuffer.add(p);
   }
-  
-  bursting = !bursting;  
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -218,8 +223,16 @@ class ParticleSystem
       } else {
         p.display();
       }
+      
+      // Kill initial particle if it goes out of bounds
+      if (p.pos.x > width || p.pos.x < 0) {
+        i.remove();  
+      } else if (p.pos.y > height || p.pos.y < 0) {
+        i.remove();  
+      }
     }
     
+    // Only access list when its not being used
     synchronized(this.baseParticlesBuffer) {
       for (int x = 0; x < this.baseParticlesBuffer.size(); x++) {
         this.baseParticles.add(this.baseParticlesBuffer.get(x));
@@ -437,7 +450,7 @@ class Particle
   
   public void explode()
   {
-    GenerateDynamicEmission(pos);
+    GenerateFireworkExplosion(pos);
     
     exploded = true;
     flashing = true;
@@ -605,7 +618,7 @@ class TwistingParticle extends Particle
     this.rot = random(TWISTING_PARTICLE_ROTATION_MIN, TWISTING_PARTICLE_ROTATION_MAX);
     
     this.subParticle = true;
-    this.applyForce(PVector.random2D().limit(random(TWISTING_PARTICLE_VELOCITY_LIMIT_MIN, TWISTING_PARTICLE_VELOCITY_LIMIT_MAX)));
+    this.applyForce(PVector.random2D().limit(random(TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN, TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX)));
     this.lifespan = TWISTING_PARTICLE_LIFESPAN;
     this.size = TWISTING_PARTICLE_SIZE;
   }
@@ -729,61 +742,16 @@ class Halo
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-// Emission functions
+// Emission function
 // Control the different ways the fireworks explode (What type of particles are used,
-// how many are spawned and introduces some variance to their colours, speed and gravity
+// how many are spawned and introduces some variance to their colours, speed and gravity.
+//
+// There were more functions before but in the end I just switched to using one monolithic
+// emission function that could generate a pretty good variety of firework explosions.
 //////////////////////////////////////////////////////////////////////////////////////
 
-// Emission with all particle types, uses complimentary colours
-void ComplementaryEmission(PVector pos)
-{
-  int particles = (int) random(10, 500);
-  
-  // Switch to using different compbinations of complimentary colours (adobe colour wheel)
-  int base_red = (int) random(0, 255);
-  int base_green = (int) random(0, 255);
-  int base_blue = (int) random(0, 255);
-  
-  for (int x = 0; x < particles; x++) {
-    
-    TrailingParticle tr = new TrailingParticle(pos);
-    tr.c = color(amplify(base_red), amplify(base_green), amplify(base_blue));
-    system.TrailingParticles.add(tr);
-    
-    int count = (int) random(1, 6);
-    switch(count)
-    {
-      case 1:
-        RandomMovementParticle r = new RandomMovementParticle(pos);
-        //system.RandomMovementParticles.add(r);
-        break;
-      case 2:
-        TwistingParticle t = new TwistingParticle(pos);
-        t.c = color(base_red + (int) random(0, 25), base_green + (int) random(0, 25), base_blue);
-        system.TwistingParticles.add(t);
-        break;
-      case 3:
-        for (int i = 0; i < 5; i++) {
-          FallingParticle f = new FallingParticle(pos);
-          f.c = color(base_red, (int) random(0, 255), base_blue + (int) random(0, 15));
-          system.FallingParticles.add(f);
-        }
-        break;
-      case 4:
-        FloatingParticle fl = new FloatingParticle(pos);
-        fl.c = color(base_blue, base_red + (int) random(0, 25), base_green + (int) random(0, 25));
-        system.FloatingParticles.add(fl);
-        break;
-      case 5:
-        SparklingParticle s = new SparklingParticle(pos, base_red, base_green, base_blue);
-        s.c = color(base_red, base_blue, base_green);
-        system.SparklingParticles.add(s);
-    }
-  }
-}
-
-// Dynamically generates an emission pattern from all available particle types
-void GenerateDynamicEmission(PVector pos)
+// Dynamically generates an emission pattern using all available particle types
+void GenerateFireworkExplosion(PVector pos)
 {
   // Base colours to derive everything from
   int base_red = (int) random(0, 255);

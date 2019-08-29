@@ -1,63 +1,71 @@
-import java.util.Iterator;
+/////////////////////////////////////////////////////////////////////////////////////
+///                                Fireworks                                      ///
+/////////////////////////////////////////////////////////////////////////////////////
+/// Firework particle system, press mouse on screen to shoot a firework in that   ///
+/// direction!                                                                    ///
+///                                                                               ///
+/// Written by Matthew Carney (29th Aug 2019)                                     ///
+///     [matthewcarney64@gmail.com] [https://github.com/Killeroo]                 ///
+///                                                                               ///
+/// Original galaxy code and inspiration:                                         ///
+//       https://www.openprocessing.org/sketch/165663                             ///
+/////////////////////////////////////////////////////////////////////////////////////
 
-final float GRAVITY = 0.03; //0.05
+import java.util.Iterator;
 
 // TODO:
 // -------
 // Must:
-// -> Final polish, comments and efficientsy pass
-// -> Mouse click fire firework
+// -> Mouse click fire firework, limit speed
 
 // Should:
-// -> Capitalise function and public variable names 
-// -> Randomised particle gravity, speed and size of particle
 // -> Splitter particle gravity switch
 
 /* General simultation options */
-final boolean ENABLE_EXPLOSION_FLASHES = false;
-final int     BACKGROUND_COLOUR = 0; // 0 = black, 255 = white
-final int     MOTION_BLUR_FACTOR = 20; // Lower = more motion blur
-
-/* Initial firework/base particle properties */
-final float INITIAL_PARTICLE_GRAVITY = 0.03;
-final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -2;
-final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 2;
-final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN = -10;
-final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -30;
-final int   INITIAL_PARTICLE_INTERVAL_MS_MIN = 1500; 
-final int   INITIAL_PARTICLE_INTERVAL_MS_MAX = 2000;
+final boolean ENABLE_EXPLOSION_FLASHES = false;              // If screen flashes when there is an explosion
+final int     BACKGROUND_COLOUR = 0;                         // 0 = black, 255 = white
+final int     MOTION_BLUR_FACTOR = 20;                       // Lower = more motion blur
 
 /* Explosion halo that eminates from some fireworks */
-final float EXPLOSION_HALO_THICKNESS = 1;
-final int   EXPLOSION_HALO_LIFESPAN = 150;
-final float EXPLOSION_HALO_SPEED_MIN = 1;
-final float EXPLOSION_HALO_SPEED_MAX = 4;
+final float EXPLOSION_HALO_THICKNESS = 1;                    // Higher = thicker halo
+final int   EXPLOSION_HALO_LIFESPAN = 150;                   // How long the halo lasts, lower = fade quicker
+final float EXPLOSION_HALO_SPEED_MIN = 1;                    // Lower bound used to generate speed the halo emits from its starting point, higher = faster
+final float EXPLOSION_HALO_SPEED_MAX = 4;                    // Upper bound used to generate speed the halo emits from its starting point, higher = faster
 
 /* Firework Particle Properties */
-/* There are 7 different types of particles used here.
-   Their properties can be modified below, have fun!
-   (Particle classes contain more info on how they act) */
+/* Here are the properties for all the particles in the sketch,
+   their properties can be modified below, have fun!
+   (Indivdual particle classes contain more info on how they act) */
+   
+/* Initial firework/base particle properties */
+final float INITIAL_PARTICLE_GRAVITY = 0.03;                 // Lower = less gravity
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -2;        // Lower bound for generating sideways force, 0 = center, further from 0 = more spread
+final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 2;         // Upper bound for generating sideways force, 0 = center, further from 0 = more spread 
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN = -10;        // Lower bound for generating initial upward force, lower = more upward force
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -30;        // Upper bound for generating initial upward force, lower = more upward force
+final int   INITIAL_PARTICLE_INTERVAL_MS_MIN = 1500;         // Lowest possible value a firework will be shot
+final int   INITIAL_PARTICLE_INTERVAL_MS_MAX = 2000;         // Highest possible value a firework will be shot
 
 /* Random Particle */
-final int   RANDOM_PARTICLE_LIFESPAN = 125;                // Lower = fade faster, higher = last longer
-final float RANDOM_PARTICLE_SIZE = 2.5;                    // Higher = bigger particle
-final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2;            // Lower = lower speed
-final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;     // High = quicker colour transition
+final int   RANDOM_PARTICLE_LIFESPAN = 125;                  // Lower = fade faster, higher = last longer
+final float RANDOM_PARTICLE_SIZE = 2.5;                      // Higher = bigger particle
+final float RANDOM_PARTICLE_VELOCITY_LIMIT = 2;              // Lower = lower speed
+final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;       // High = quicker colour transition
 
 /* Falling Particle */
-final int   FALLING_PARTICLE_SIZE = 1;                      // Higher = bigger particle
-final int   FALLING_PARTICLE_LIFESPAN = 250;                // Lower = fade faster, higher = last longer
-final float FALLING_PARTICLE_GRAVITY = 0.03;                // Lower = less gravity
-final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;  // Lower bound used to generate initial particle acceleration
-final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;  // Upper bound used to generate initial particle acceleration
-final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;         // Lower bound of initial force applied to particle
-final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;         // Upper bound of initial force applied to particle
+final int   FALLING_PARTICLE_SIZE = 1;                       // Higher = bigger particle
+final int   FALLING_PARTICLE_LIFESPAN = 250;                 // Lower = fade faster, higher = last longer
+final float FALLING_PARTICLE_GRAVITY = 0.03;                 // Lower = less gravity
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;   // Lower bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;   // Upper bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;          // Lower bound of initial force applied to particle
+final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;          // Upper bound of initial force applied to particle
 
 /* Floating Particle */
-final int   FLOATING_PARTICLE_SIZE = 3;                     // Higher = bigger particle
-final int   FLOATING_PARTICLE_LIFESPAN = 175;               // Lower = fade faster, higher = last longer
-final float FLOATING_PARTICLE_VELOCITY_LIMIT_MIN = 0.5;     // Lower bound used to generate initial particle velocity
-final float FLOATING_PARTICLE_VELOCITY_LIMIT_MAX = 2;       // Upper bound used to generate initial particle velocity
+final int   FLOATING_PARTICLE_SIZE = 3;                      // Higher = bigger particle
+final int   FLOATING_PARTICLE_LIFESPAN = 175;                // Lower = fade faster, higher = last longer
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MIN = 0.5;      // Lower bound used to generate initial particle velocity
+final float FLOATING_PARTICLE_VELOCITY_LIMIT_MAX = 2;        // Upper bound used to generate initial particle velocity
 
 /* Sparkling Particle */
 final int   SPARKLING_PARTICLE_LIFESPAN = 315;               // Lower = fade faster, higher = last longer
@@ -65,33 +73,33 @@ final float SPARKLING_PARTICLE_GRAVITY = 0.025;              // Lower = less gra
 final int   SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;           // Max distance sparkles will be drawn from particle position, higher = more sparkle spread
 final float SPARKLING_PARTICLE_SPARKLE_SIZE_MIN = 1;         // Lower bound for size of sparkles
 final float SPARKLING_PARTICLE_SPARKLE_SIZE_MAX = 3;         // Upper bound for size of sparkles
-final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN =  0.25; // Lower bound used to generate initial particle velocity
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN = 0.25;  // Lower bound used to generate initial particle velocity
 final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX = 0.5;   // Upper bound used to generate initial particle velocity
 
 /* Twisting Particle */
-final int   TWISTING_PARTICLE_SIZE = 2;
-final float TWISTING_PARTICLE_GRAVITY = 0.01;
-final int   TWISTING_PARTICLE_LIFESPAN = 250;
-final int   TWISTING_PARTICLE_SEPERATION = 5;
-final float TWISTING_PARTICLE_ROTATION_MIN = 50;
-final float TWISTING_PARTICLE_ROTATION_MAX = 150;
-final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;
-final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;
-final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN = 1;
-final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX = 2;
+final int   TWISTING_PARTICLE_SIZE = 2;                      // Higher = bigger particle
+final float TWISTING_PARTICLE_GRAVITY = 0.01;                // Lower = less gravity
+final int   TWISTING_PARTICLE_LIFESPAN = 250;                // Lower = fade faster, higher = last longer
+final int   TWISTING_PARTICLE_SEPERATION = 5;                // Distance between the 2 twisting particles, higher = bigger distance
+final float TWISTING_PARTICLE_ROTATION_MIN = 50;             // Lower bound used to generate rotation for particle
+final float TWISTING_PARTICLE_ROTATION_MAX = 150;            // Upper bound used to generate rotation for particle
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;    // Lower bound used to generate initial particle velocity
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;      // Upper bound used to generate initial particle velocity
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN = 1;   // Lower bound of initial force applied to particle
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX = 2;   // Upper bound of initial force applied to particle
 
 /* Trailing Particle */
-final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;
-final float TRAILING_PARTICLE_LIFESPAN_MAX = 350;
-final float TRAILING_PARTICLE_GRAVITY = 0.005;
-final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN = 1;
-final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX = 2;
+final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;            // Lower bound used to create particle lifespan
+final float TRAILING_PARTICLE_LIFESPAN_MAX = 350;            // Upper bound used to create particle lifespan
+final float TRAILING_PARTICLE_GRAVITY = 0.005;               // Lower = less gravity
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN = 1;      // Lower bound used to create initiate force applied to particle
+final float TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX = 2;      // Upper bound used to create initiate force applied to particle
 
 /* Splitter Particle */
-final int   SPLITTER_PARTICLE_LIFESPAN = 150;
-final float SPLITTER_PARTICLE_GRAVITY = 0.03;
-final int   SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT = 75;
-final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;
+final int   SPLITTER_PARTICLE_LIFESPAN = 150;                // Lower = fade faster, higher = last longer
+final float SPLITTER_PARTICLE_GRAVITY = 0.03;                // Lower = less gravity
+final int   SPLITTER_PARTICLE_LIFESPAN_EXPLOSION_POINT = 75; // At what lifespan value will the particle split, higher will cause the particle to split sooner
+final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;     // How many particles to spawn when the particle splits
 
 // Internal variables
 ParticleSystem system = new ParticleSystem();
@@ -751,6 +759,7 @@ class Halo
 //////////////////////////////////////////////////////////////////////////////////////
 
 // Dynamically generates an emission pattern using all available particle types
+// (this is where the magic happens)
 void GenerateFireworkExplosion(PVector pos)
 {
   // Base colours to derive everything from

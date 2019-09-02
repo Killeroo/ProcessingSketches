@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////////////
+             /////////////////////////////////////////////////////////////////////////////////////
 ///                                Fireworks                                      ///
 /////////////////////////////////////////////////////////////////////////////////////
 /// Firework particle system, press mouse on screen to shoot a firework in that   ///
@@ -7,8 +7,8 @@
 /// Written by Matthew Carney (29th Aug 2019)                                     ///
 ///     [matthewcarney64@gmail.com] [https://github.com/Killeroo]                 ///
 ///                                                                               ///
-/// Original galaxy code and inspiration:                                         ///
-//       https://www.openprocessing.org/sketch/165663                             ///
+/// Inspiration:                                                                  ///
+//       http://jtnimoy.net/item.php?handle=14881671-tron-legacy                  ///
 /////////////////////////////////////////////////////////////////////////////////////
 
 import java.util.Iterator;
@@ -16,7 +16,7 @@ import java.util.Iterator;
 // TODO:
 // -------
 // Must:
-// -> Mouse click fire firework, limit speed
+// -> Mouse click limit speed based on pos
 
 // Should:
 // -> Splitter particle gravity switch
@@ -104,6 +104,7 @@ final int   SPLITTER_PARTICLE_EXPLOSION_SPAWN_COUNT = 5;     // How many particl
 // Internal variables
 ParticleSystem system = new ParticleSystem();
 int interval = 0;
+int inputStaggerTime = 0;
 boolean flashing = false;
 
 void setup()
@@ -146,14 +147,19 @@ void draw()
 
 void mousePressed()
 {
+  // Stagger input to once every 250 ms
+  if (inputStaggerTime > millis())
+    return;
+    
   PVector target = new PVector(mouseX, mouseY);
   PVector base = new PVector(width/2, height);
   
   PVector force = new PVector(
     target.sub(base).normalize().mult(5).x, 
-    target.sub(base).normalize().mult(10).y//random(INITIAL_PARTICLE_UPWARDS_FORCE_MIN, INITIAL_PARTICLE_UPWARDS_FORCE_MAX)
+    target.sub(base).normalize().mult(10).y
   );
-  //println(force);
+  
+  println(target.sub(base).mag());
   
   // Lock buffer so we don't get an access exception from adding to the list
   // when we are accessing it in the ParticleSystem
@@ -162,6 +168,8 @@ void mousePressed()
     p.applyForce(force); 
     system.baseParticlesBuffer.add(p);
   }
+  
+  inputStaggerTime = millis() + 250;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -7,24 +7,20 @@
 /// Written by Matthew Carney (29th Aug 2019)                                     ///
 ///     [matthewcarney64@gmail.com] [https://github.com/Killeroo]                 ///
 ///                                                                               ///
-/// Inspiration:                                                                  ///
+/// Inspiration - JT Nimoy's fireworks for Tron Legacy:                           ///
 //       http://jtnimoy.net/item.php?handle=14881671-tron-legacy                  ///
 /////////////////////////////////////////////////////////////////////////////////////
 
 import java.util.Iterator;
 
-// TODO:
-// -------
-// Must:
-// -> Mouse click limit speed based on pos
-
-// Should:
-// -> Splitter particle gravity switch
-
 /* General simultation options */
 final boolean ENABLE_EXPLOSION_FLASHES = false;              // If screen flashes when there is an explosion
 final int     BACKGROUND_COLOUR = 0;                         // 0 = black, 255 = white
 final int     MOTION_BLUR_FACTOR = 20;                       // Lower = more motion blur
+final int     MOUSE_INPUT_DELAY = 250;                       // Interval between fireworks when using mouse (in milliseconds)
+final int     MOUSE_FIREWORK_UPPER_FORCE_MAX = 13;           // Max upper force to apply to firework created using mouse
+final int     MOUSE_FIREWORK_UPPER_FORCE_MIN = 4;            // Lower upper force to use when creating a firework using mouse 
+final int     MOUSE_FIREWORK_SIDEWAYS_FORCE_MULTIPLIER = 5;  // Multiplier for sideways force on mouse particles
 
 /* Explosion halo that eminates from some fireworks */
 final float EXPLOSION_HALO_THICKNESS = 1;                    // Higher = thicker halo
@@ -150,16 +146,15 @@ void mousePressed()
   // Stagger input to once every 250 ms
   if (inputStaggerTime > millis())
     return;
-    
+  
+  // Determine mouse position and work out force for new firework
   PVector target = new PVector(mouseX, mouseY);
   PVector base = new PVector(width/2, height);
   
   PVector force = new PVector(
-    target.sub(base).normalize().mult(5).x, 
-    target.sub(base).normalize().mult(10).y
+    target.sub(base).normalize().mult(MOUSE_FIREWORK_SIDEWAYS_FORCE_MULTIPLIER).x, 
+    target.sub(base).normalize().mult(map(height - mouseY, 0, height, MOUSE_FIREWORK_UPPER_FORCE_MIN, MOUSE_FIREWORK_UPPER_FORCE_MAX)).y
   );
-  
-  println(target.sub(base).mag());
   
   // Lock buffer so we don't get an access exception from adding to the list
   // when we are accessing it in the ParticleSystem
@@ -169,7 +164,8 @@ void mousePressed()
     system.baseParticlesBuffer.add(p);
   }
   
-  inputStaggerTime = millis() + 250;
+  // Stagger till next firework
+  inputStaggerTime = millis() + MOUSE_INPUT_DELAY;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

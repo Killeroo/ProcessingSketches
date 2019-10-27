@@ -25,7 +25,7 @@ import java.util.Iterator;
 final boolean ENABLE_EXPLOSION_FLASHES = false;              // If screen flashes when there is an explosion
 final int     BACKGROUND_COLOUR = 0;                         // 0 = black, 255 = white
 final int     MOTION_BLUR_FACTOR = 20;                       // Lower = more motion blur
-final int     MOUSE_INPUT_DELAY = 250;                       // Interval between fireworks when using mouse (in milliseconds)
+final int     MOUSE_INPUT_DELAY = 500;                       // Interval between fireworks when using mouse (in milliseconds)
 final int     MOUSE_FIREWORK_UPPER_FORCE_MAX = 13;           // Max upper force to apply to firework created using mouse
 final int     MOUSE_FIREWORK_UPPER_FORCE_MIN = 4;            // Lower upper force to use when creating a firework using mouse 
 final int     MOUSE_FIREWORK_SIDEWAYS_FORCE_MULTIPLIER = 5;  // Multiplier for sideways force on mouse particles
@@ -45,8 +45,8 @@ final float EXPLOSION_HALO_SPEED_MAX = 4;                    // Upper bound used
 final float INITIAL_PARTICLE_GRAVITY = 0.03;                 // Lower = less gravity
 final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MIN = -2;        // Lower bound for generating sideways force, 0 = center, further from 0 = more spread
 final int   INITIAL_PARTICLE_SIDEWAYS_FORCE_MAX = 2;         // Upper bound for generating sideways force, 0 = center, further from 0 = more spread 
-final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN = -8;         // Lower bound for generating initial upward force, lower = more upward force
-final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -10;        // Upper bound for generating initial upward force, lower = more upward force
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MIN =-8;         // Lower bound for generating initial upward force, lower = more upward force
+final int   INITIAL_PARTICLE_UPWARDS_FORCE_MAX = -10;
 final int   INITIAL_PARTICLE_INTERVAL_MS_MIN = 1500;         // Lowest possible value a firework will be shot
 final int   INITIAL_PARTICLE_INTERVAL_MS_MAX = 2000;         // Highest possible value a firework will be shot
 
@@ -60,6 +60,10 @@ final float RANDOM_PARTICLE_COLOUR_LERP_AMOUNT = 0.01;       // High = quicker c
 final int   FALLING_PARTICLE_SIZE = 1;                       // Higher = bigger particle
 final int   FALLING_PARTICLE_LIFESPAN = 250;                 // Lower = fade faster, higher = last longer
 final float FALLING_PARTICLE_GRAVITY = 0.03;                 // Lower = less gravity
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MIN = 3;   // Lower bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_ACCELERATION_MAX = 6;   // Upper bound used to generate initial particle acceleration
+final float FALLING_PARTICLE_INITIAL_FORCE_MIN = 2;          // Lower bound of initial force applied to particle
+final float FALLING_PARTICLE_INITIAL_FORCE_MAX = 6;          // Upper bound of initial force applied to particle
 
 /* Floating Particle */
 final int   FLOATING_PARTICLE_SIZE = 3;                      // Higher = bigger particle
@@ -73,6 +77,8 @@ final float SPARKLING_PARTICLE_GRAVITY = 0.025;              // Lower = less gra
 final int   SPARKLING_PARTICLE_SPARKLE_OFFSET = 5;           // Max distance sparkles will be drawn from particle position, higher = more sparkle spread
 final float SPARKLING_PARTICLE_SPARKLE_SIZE_MIN = 1;         // Lower bound for size of sparkles
 final float SPARKLING_PARTICLE_SPARKLE_SIZE_MAX = 3;         // Upper bound for size of sparkles
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN = 0.25;  // Lower bound used to generate initial particle velocity
+final float SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX = 0.5;   // Upper bound used to generate initial particle velocity
 
 /* Twisting Particle */
 final int   TWISTING_PARTICLE_SIZE = 2;                      // Higher = bigger particle
@@ -81,6 +87,10 @@ final int   TWISTING_PARTICLE_LIFESPAN = 250;                // Lower = fade fas
 final int   TWISTING_PARTICLE_SEPERATION = 5;                // Distance between the 2 twisting particles, higher = bigger distance
 final float TWISTING_PARTICLE_ROTATION_MIN = 50;             // Lower bound used to generate rotation for particle
 final float TWISTING_PARTICLE_ROTATION_MAX = 150;            // Upper bound used to generate rotation for particle
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MIN = 0.5;    // Lower bound used to generate initial particle velocity
+final float TWISTING_PARTICLE_INITIAL_VELOCITY_MAX = 1;      // Upper bound used to generate initial particle velocity
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN = 1;   // Lower bound of initial force applied to particle
+final float TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX = 2;   // Upper bound of initial force applied to particle
 
 /* Trailing Particle */
 final float TRAILING_PARTICLE_LIFESPAN_MIN = 275;            // Lower bound used to create particle lifespan
@@ -142,6 +152,7 @@ void draw()
 
 void mousePressed()
 {
+  
   // Stagger input to once every 250 ms
   if (inputStaggerTime > millis())
     return;
@@ -149,20 +160,18 @@ void mousePressed()
   // Determine mouse position and work out force for new firework
   PVector target = new PVector(mouseX, mouseY);
   PVector base = new PVector(width/2, height);
-  PVector distance = target.sub(base);
+  PVector distance = new PVector();
+  distance = sub(target, base);
+  distance.normalize();
   
   PVector force = new PVector(
-    distance.normalize().mult(MOUSE_FIREWORK_SIDEWAYS_FORCE_MULTIPLIER).x, 
-    distance.normalize().mult(map(height - mouseY, 0, height, MOUSE_FIREWORK_UPPER_FORCE_MIN, MOUSE_FIREWORK_UPPER_FORCE_MAX)).y
+    distance.x * MOUSE_FIREWORK_SIDEWAYS_FORCE_MULTIPLIER, 
+    distance.y * map(height - mouseY, 0, height, MOUSE_FIREWORK_UPPER_FORCE_MIN, MOUSE_FIREWORK_UPPER_FORCE_MAX)
   );
   
-  // Lock buffer so we don't get an access exception from adding to the list
-  // when we are accessing it in the ParticleSystem
-  //synchronized(system.baseParticlesBuffer) {
-    Particle p = new Particle(base);
-    p.applyForce(force); 
-    system.baseParticlesBuffer.add(p);
-  //}
+  Particle p = new Particle(base);
+  p.applyForce(force); 
+  system.baseParticlesBuffer.add(p);
   
   // Stagger till next firework
   inputStaggerTime = millis() + MOUSE_INPUT_DELAY;
@@ -538,9 +547,17 @@ class FallingParticle extends Particle
     // Create initial velocity in random directions upon spawning
     this.vel = PVector.random2D();
     this.acc = PVector.random2D();
+    float vel_limit = random(FALLING_PARTICLE_INITIAL_ACCELERATION_MIN, FALLING_PARTICLE_INITIAL_ACCELERATION_MAX);
+    float acc_limit = random(FALLING_PARTICLE_INITIAL_ACCELERATION_MIN, FALLING_PARTICLE_INITIAL_ACCELERATION_MAX);
+    limit(this.vel, vel_limit);
+    limit(this.acc, acc_limit);
+    
     this.c = color(random(0, 200), random(25, 100), random(0, 255));
     this.subParticle = true;
-    this.applyForce(PVector.random2D());
+    PVector force = PVector.random2D();
+    float force_limit = random(FALLING_PARTICLE_INITIAL_FORCE_MIN, FALLING_PARTICLE_INITIAL_FORCE_MAX);
+    limit(force, force_limit);
+    this.applyForce(force);
     this.lifespan = FALLING_PARTICLE_LIFESPAN;
     this.size = FALLING_PARTICLE_SIZE;
   }
@@ -581,6 +598,10 @@ class SparklingParticle extends Particle
     this.subParticle = true;
     this.vel = PVector.random2D();
     this.acc = PVector.random2D();
+    float vel_limit = random(SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN, SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX);
+    float acc_limit = random(SPARKLING_PARTICLE_INITIAL_VELOCITY_MIN, SPARKLING_PARTICLE_INITIAL_VELOCITY_MAX);
+    limit(this.vel, vel_limit);
+    limit(this.acc, acc_limit);
     this.r = _r;
     this.g = _g;
     this.b = _b;
@@ -608,7 +629,10 @@ class TrailingParticle extends Particle
     
     this.lifespan = (int) random(TRAILING_PARTICLE_LIFESPAN_MIN, TRAILING_PARTICLE_LIFESPAN_MAX);
     this.subParticle = true;
-    this.applyForce(PVector.random2D());//.mult(random(TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN, TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX)));
+    PVector force = PVector.random2D();
+    float amount = random(TRAILING_PARTICLE_FORCE_MULTIPLIER_MIN, TRAILING_PARTICLE_FORCE_MULTIPLIER_MAX);
+    mult(force, amount);
+    this.applyForce(force);
   }
 }
 
@@ -625,10 +649,16 @@ class TwistingParticle extends Particle
     super(p);
     this.vel = PVector.random2D();
     this.acc = PVector.random2D();
+    float vel_limit = random(TWISTING_PARTICLE_INITIAL_VELOCITY_MIN, TWISTING_PARTICLE_INITIAL_VELOCITY_MAX);
+    float acc_limit = random(TWISTING_PARTICLE_INITIAL_VELOCITY_MIN, TWISTING_PARTICLE_INITIAL_VELOCITY_MAX);
+    limit(this.vel, vel_limit);
+    limit(this.acc, acc_limit);
     this.c = color(random(25, 255), random(75, 125), 0);
     this.rot = random(TWISTING_PARTICLE_ROTATION_MIN, TWISTING_PARTICLE_ROTATION_MAX);
-    
     this.subParticle = true;
+    PVector force = PVector.random2D();
+    float force_limit = random(TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MIN, TWISTING_PARTICLE_INITIAL_FORCE_LIMIT_MAX);
+    limit(force, force_limit);
     this.applyForce(PVector.random2D());
     this.lifespan = TWISTING_PARTICLE_LIFESPAN;
     this.size = TWISTING_PARTICLE_SIZE;
@@ -856,6 +886,29 @@ void GenerateFireworkExplosion(PVector pos)
 //////////////////////////////////////////////////////////////////////////////////////
 
 // 'Brighten' a given RGB value
-float amplify(float n) {
+float amplify(float n) 
+{
   return constrain(2 * n, 0, 255);
+}
+
+// Replacement functions for PVector.limit and PVector.mult
+// which were misbehaving
+void limit(PVector v, float limit) 
+{
+  if (v.mag() > limit) {
+    v.normalize();
+    mult(v, limit);
+  }
+}
+void mult(PVector v, float multiplier)
+{
+  v.x *= multiplier;
+  v.y *= multiplier;
+}
+PVector sub(PVector v, PVector sub)
+{
+  PVector res = new PVector();
+  res.x = v.x - sub.x;
+  res.y = v.y - sub.y;
+  return res;
 }

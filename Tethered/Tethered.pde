@@ -39,6 +39,9 @@ void draw()
     if (end != null) {
       stroke(0);
       line(points[x].x, points[x].y, end.x, end.y);
+      if (x+1 < COUNT) {
+        bezier(points[x].x, points[x+1].x, end.x, end.y, points[x].y, points[x+1].y, end.x, end.y);
+      }
     } else {
       // Save the start point so we can draw a line back to it at the end
       start = new PVector(points[x].x, points[x].y);

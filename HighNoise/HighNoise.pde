@@ -65,7 +65,7 @@ void draw()
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     PVector position = pos[x];
-    float angle = noise(position.x/(noiseScale * 2.5)*PI*(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
+    float angle = noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
     vel[x].x = cos(angle);
     vel[x].y = sin(angle);
     //vel[x].mult(1.5);

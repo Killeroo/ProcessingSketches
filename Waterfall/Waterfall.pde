@@ -43,12 +43,13 @@ void setup()
   fill(255);
   noStroke();
 }
-
+int blue_target = 120;
+int current_blue = 120;
 void draw()
 {
   
-  noiseScale = mouseX;
-  println(noiseScale);
+  //noiseScale = mouseX;
+  //println(noiseScale);
   
   //background(0);
   
@@ -75,10 +76,10 @@ void draw()
     //fill(map(angle, 0, 1, 0, 255), map(vel[x].x, 0, 1, 0, 255), map(vel[x].y, 0, 1, 0, 255),life[x]);
             //fill(c, life[x]);
     //ellipse(pos[x].x, pos[x].y, 2, 2);
-    
-            fill(map(vel[x].x, 0, 1, 0, 255), 0, 120,life[x]);
+            fill(map(vel[x].y, 0, 1, 0, 255), map(pos[x].x, 0, 500, 0, 255), current_blue,life[x]);
     ellipse(pos[x].x, pos[x].y, 2, 2);
     
+    //println(vel[x].x + " " +vel[x].y);
     //acc[x].mult(0);
     /*
     if (life[x] < 0) {
@@ -116,6 +117,17 @@ void draw()
     //fill(map(angle, 0, 1, 0, 255), map(vel[x].x, 0, 1, 0, 255), map(vel[x].y, 0, 1, 0, 255));
 
 
+  }
+  if (millis() % 200 == 0) {
+    blue_target = (int) random(0, 255);  
+
+    //noiseSeed(millis());  
+  } else {
+    if (current_blue < blue_target) {
+      current_blue++;  
+    } else if (current_blue > blue_target) {
+      current_blue--;  
+    }
   }
   
   fill(255);

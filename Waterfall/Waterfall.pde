@@ -5,6 +5,7 @@ PVector[] vel = new PVector[PARTICLE_COUNT];
 int[] life = new int[PARTICLE_COUNT];
 
 // repel on mouse
+float[][] noiseMap = new float[1000][1000];
 
 PVector center;
  color c = color(200, 20, 20);
@@ -14,13 +15,27 @@ void setup()
 {
   
   size(1000,1000);
-  background(0);
+  background(255); //0
   
   // Setup up our particle properties
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x] = new PVector(random(0, 200), random(0, height));
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
     life[x] = (int) random(10, 500);
+  }
+  
+  for (int x = 0; x < 1000; x++) {
+    for (int y = 0; y < 1000; y++) {
+      noiseMap[x][y] = noise((x/300), (y/200));
+    }
+  }
+  
+  // Draw noise map
+  for (int x = 0; x < 1000; x++) {
+    for (int y = 0; y < 1000; y++) {
+      stroke(map(noiseMap[x][y], 0, 1, 0, 255));
+      point(x, y);  
+    }
   }
   
   fill(255);
@@ -30,6 +45,8 @@ int blue_target = 120;
 int current_blue = 120;
 void draw()
 {
+  //background(20, 20, 150);
+  
   // Motion blur
   noStroke();
   fill(0, 20);
@@ -43,13 +60,29 @@ void draw()
     //vel[x].mult(1.5);
     vel[x].mult(1.5);//2);
     
-    if ((pos[x].x - mouseX) < 50 && (pos[x].x + mouseX) > 50 && 
-        (pos[x].y - mouseY) < 50 && (pos[x].y + mouseY) > 50) {
-      vel[x].mult(10);  
+    // Add repel force please
+    if (((pos[x].x - mouseX) < 50 &
+        (pos[x].y - mouseY) < 50) &&
+        (mouseX - pos[x].x) > 50) {
+      //vel[x].mult(10);  
     }
     pos[x].add(vel[x]); // accessing vel here, bad!
     
-    fill(map(vel[x].y, 0, 1, 0, 255), map(pos[x].x, 0, 500, 0, 255), current_blue,life[x]);
+    // The one:
+    fill(map(vel[x].y, 0, 1, 0, 255), map(pos[x].x, 0, 500, 0, 255), current_blue, life[x]);
+    
+    //fill(map(angle, 0, 1, 0, 255), life[x]);//,0,0);//, 15);
+    
+    /* float theta = vel[x].heading() + radians(90);
+    pushMatrix();
+    translate(pos[x].x, pos[x].y);
+    rotate(theta);
+    beginShape(TRIANGLES);
+    vertex(0, -2.0*2);
+    vertex(-2.0, 2.0*2);
+    vertex(2.0, 2.0*2);
+    endShape();
+    popMatrix(); */
     ellipse(pos[x].x, pos[x].y, 2, 2);
     
     //println(vel[x].x + " " +vel[x].y);

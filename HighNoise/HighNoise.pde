@@ -31,6 +31,8 @@ void setup()
   background(0);
   //blendMode(BLEND);
   
+  noiseSeed(10);
+  
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     pos[x] = new PVector(random(0, width), random(0, height));
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
@@ -47,7 +49,7 @@ void setup()
 void draw()
 {
   
-  noiseScale = mouseX;
+  noiseScale =mouseX; //225
   println(noiseScale);
   
   //background(0);
@@ -66,15 +68,27 @@ void draw()
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     PVector position = pos[x];
     float angle = noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
-    vel[x].x = cos(angle);
-    vel[x].y = sin(angle);
+    vel[x].x = cos(angle);//cos(angle);
+    vel[x].y = sin(angle);//sin(angle);
+    
     //vel[x].mult(1.5);
     vel[x].mult(0.8);//2);
     pos[x].add(vel[x]); // accessing vel here, bad!
     
     fill(map(angle, 0, 1, 0, 255), map(vel[x].x, 0, 1, 0, 255), map(vel[x].y, 0, 1, 0, 255),life[x]);
             //fill(c, life[x]);
-    ellipse(pos[x].x, pos[x].y, 2, 2);
+            //https://www.desmos.com/calculator/l3u8133jwj
+    if (x == 12)
+    {
+      println(">angle<" + angle);
+      println(">vel.x<" + vel[x].x);
+      println(">vel.y<" + vel[x].y);
+      ellipse(pos[x].x, pos[x].y, 6, 6);
+    }
+    else
+    {
+      ellipse(pos[x].x, pos[x].y, 2, 2);
+    }
     
     //acc[x].mult(0);
     if (life[x] < 0) {

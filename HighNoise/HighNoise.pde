@@ -5,19 +5,7 @@ PVector[] acc = new PVector[PARTICLE_COUNT]; // Remove this, we don't use it her
 PVector[] vel = new PVector[PARTICLE_COUNT];
 int[] life = new int[PARTICLE_COUNT];
 
-// The trick is store structures of arrays as opposed to arrays of structures.
-
-// If you have an array of objects (each storing a position, speed, colour etc) and 
-// your process is to go through that array and act on each property, think of how 
-// that array of objects would be layed out in memory, your cutting it all up.
-
-// If you want to store stuff efficiently and nicely in memory seperate out the properties
-// into their own arrays
-
-// Orders of making things efficient:
-// Seperation
-// Vectorisation
-// Parrellisation
+//https://www.desmos.com/calculator/l3u8133jwj
 
 PVector center;
  color c = color(200, 20, 20);
@@ -34,7 +22,7 @@ void setup()
   noiseSeed(10);
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
-    pos[x] = new PVector(random(0, width), random(0, height));
+    pos[x] = new PVector(random(0, width), 0);// random(0, height));
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
     acc[x] = new PVector(0, 0);
     life[x] = (int) random(10, 500);
@@ -43,13 +31,14 @@ void setup()
   center = new PVector(width/2, height/2);
   
   fill(255);
+  noFill();
   noStroke();
 }
 
 void draw()
 {
   
-  noiseScale =mouseX; //225
+  noiseScale = 255;
   println(noiseScale);
   
   //background(0);
@@ -57,13 +46,6 @@ void draw()
   noStroke();
   fill(0, 20);
   rect(0, 0, width, height);
-  
-  // Act on each array seperately as well, otherwise you are still mixing and matching
-  // the arrays that are in different parts of memory
-  
-  for (int x = 0; x < PARTICLE_COUNT; x++) {
-    //vel[x].add(acc[x]);
-  }
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     PVector position = pos[x];
@@ -76,8 +58,7 @@ void draw()
     pos[x].add(vel[x]); // accessing vel here, bad!
     
     fill(map(angle, 0, 1, 0, 255), map(vel[x].x, 0, 1, 0, 255), map(vel[x].y, 0, 1, 0, 255),life[x]);
-            //fill(c, life[x]);
-            //https://www.desmos.com/calculator/l3u8133jwj
+    
     if (x == 12)
     {
       println(">angle<" + angle);
@@ -88,12 +69,13 @@ void draw()
     else
     {
       ellipse(pos[x].x, pos[x].y, 2, 2);
+      //point(pos[x].x, pos[x].y);
     }
     
     //acc[x].mult(0);
     if (life[x] < 0) {
-      pos[x] = new PVector(random(width), random(height));  
-      life[x] = (int)random(250, 300); // 350, 500
+      pos[x] = new PVector(random(width), 0);//random(height));  
+      life[x] = (int) random(450, 900);//random(250, 300); 
     } else {
       life[x]--;
     }

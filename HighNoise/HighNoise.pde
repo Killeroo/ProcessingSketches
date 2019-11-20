@@ -106,43 +106,6 @@ void draw()
     if (pos[x].y > 1000) pos[x].y = 0;
   }
   
-  for (int x = 0; x < PARTICLE_COUNT; x++) {
-    //PVector f = PVector.sub(center, pos[x]); // accessing pos here, bad!
-    //f.normalize();
-    //f.mult(0.01);
-    //acc[x] = f;
-    
-    /*
-        fill(c, life[x]);
-    ellipse(pos[x].x, pos[x].y, 2, 2);
-    
-    //acc[x].mult(0);
-    if (life[x] < 0) {
-      pos[x] = new PVector(1, random(height));  
-      life[x] = (int)random(250, 300); // 350, 500
-    } else {
-      life[x]--;
-    }
-    */
-    
-    //fill(map(angle, 0, 1, 0, 255), map(vel[x].x, 0, 1, 0, 255), map(vel[x].y, 0, 1, 0, 255));
-
-
-  }
-  
-  fill(255);
-  //stroke(255);
-  /*for (int x = 0; x < PARTICLE_COUNT; x++) {
-    if (x % 2 == 0)
-      fill(255, 150, 0);
-    else
-      fill(255);
-    
-    ellipse(pos[x].x, pos[x].y, 2, 2);
-    //point(pos[x].x, pos[x].y);
-  }
-  */
-  
   println("fps: " + frameRate);
 }
 

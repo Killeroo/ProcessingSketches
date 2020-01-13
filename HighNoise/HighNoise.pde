@@ -5,6 +5,11 @@ PVector[] acc = new PVector[PARTICLE_COUNT]; // Remove this, we don't use it her
 PVector[] vel = new PVector[PARTICLE_COUNT];
 int[] life = new int[PARTICLE_COUNT];
 
+// Spawn mode
+int spawnMode = 0; // 0 = spawn from left and right sides
+                   // 1 = spawn from up, down, left and right sides 
+                   // 2 = spawn from anywhere
+              
 //https://www.desmos.com/calculator/l3u8133jwj
 
 PVector center;
@@ -22,7 +27,7 @@ void setup()
   noiseSeed(10);
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
-    pos[x] = new PVector(random(0, width), 0);// random(0, height));
+
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
     acc[x] = new PVector(0, 0);
     life[x] = (int) random(10, 500);
@@ -74,7 +79,12 @@ void draw()
     
     //acc[x].mult(0);
     if (life[x] < 0) {
-      pos[x] = new PVector(random(width), 0);//random(height));  
+      if (x % 2 == 0) {
+        pos[x] = new PVector(random(width), 0);//random(height)); 
+      } else {
+        pos[x] = new PVector(0, random(height));//random(height)); 
+      }
+      //pos[x] = new PVector(random(width), 0);//random(height));  
       life[x] = (int) random(450, 900);//random(250, 300); 
     } else {
       life[x]--;
@@ -96,4 +106,29 @@ void mousePressed()
   noiseSeed(millis());  
 
   
+}
+
+PVector GetParticleSpawnPosition(int particleIndex)
+{
+  PVector pos = new PVector(random(0, width), 0);
+  switch (spawnMode)
+  {
+    case 0:
+    {
+      pos = new PVector(random(0, width), 0);
+    }
+    case 1:
+    {
+      if (particleIndex % 2 == 0) {
+        pos = new PVector(random(width), 0);
+      } else {  
+        pos = new PVector(0, random(height)); 
+      }
+    }
+    case 2:
+    {
+      pos = new PVector(random(0, width), random(0, height)); 
+    }
+  }
+  return pos;
 }

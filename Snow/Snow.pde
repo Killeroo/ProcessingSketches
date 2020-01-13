@@ -6,17 +6,19 @@ ParticleSystem system;
 //https://processing.org/examples/smokeparticlesystem.html
 void setup()
 {
-  //background(255);
+  background(0);
   size(1000, 1000);  
+  noStroke();
+  
   system = new ParticleSystem();
 }
 
 void draw()
 {
-  background(255);
+  background(0);
   
-  PVector wind = new PVector(-0.01, 0);
-  system.applyForce(wind);
+  //PVector wind = new PVector(-0.01, 0);
+  //system.applyForce(wind);
   system.run();
   system.add();
 }
@@ -26,8 +28,10 @@ class Particle
   PVector pos;
   PVector vel;
   PVector acc;
+  float mass;
   int lifespan;
   int startingLifespan; // Use to properly fade particle
+  
   // TODO: add mass
   // TODO: random wind direction change
   
@@ -40,13 +44,15 @@ class Particle
     
     pos = p;
     acc = new PVector(0, 0);
-    lifespan = (int) random(250, 300);
+    mass = random(2, 3);
+    lifespan = (int) random(500, 650);
     startingLifespan = lifespan;
   }
   
   void applyForce(PVector force) 
   {
-    acc.add(force);  
+    PVector f = PVector.div(force, mass);
+    acc.add(f);  
   }
   
   boolean isDead()
@@ -69,7 +75,7 @@ class Particle
   
   void draw()
   {
-    fill(0, map(lifespan, 0, startingLifespan, 0, 255));
+    fill(255, map(lifespan, 0, startingLifespan-200, 0, 255));
     ellipse(pos.x, pos.y, 2, 2);
   }
   
@@ -94,6 +100,7 @@ class ParticleSystem
       
       p.applyForce(new PVector(0, 0.03));
       p.update();
+      //p.vel.limit(2);
       p.draw();
       
       if (p.isDead()) {
@@ -111,7 +118,7 @@ class ParticleSystem
   
   void add()
   {
-    if (particles.size() > 400) {
+    if (particles.size() > 1000) {
       return;  
     }
     particles.add(new Particle(new PVector(random(width), 0)));

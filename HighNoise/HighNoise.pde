@@ -1,5 +1,5 @@
-final int PARTICLE_COUNT = 5000;
-final int FONT_SIZE = 20;
+final int PARTICLE_COUNT = 3500;
+final int FONT_SIZE = 13;
 
 PVector[] pos = new PVector[PARTICLE_COUNT];
 PVector[] vel = new PVector[PARTICLE_COUNT];
@@ -12,15 +12,25 @@ String[] options = new String[] {
   "mode",
   "motionblur" 
 };
+
+float[] modes = new float[] {
+  PI,
+  TWO_PI,
+  HALF_PI,
+  QUARTER_PI,
+  TAU
+};
+
 int selectedOption = 0;
 
 int spawnMode = 0; // 0 = spawn from left and right sides
                    // 1 = spawn from up, down, left and right sides 
                    // 2 = spawn from anywhere 
 int noiseScale = 255;
-float mode = PI; // TWO_PI 
+int mode = 2;
 int seed = millis();
 float multiplier = 0.8;
+boolean motionblur = true;
 int propertiesTimer;
  
 void setup()
@@ -29,7 +39,7 @@ void setup()
   size(1000,1000);
   //fullScreen();
   background(0);
-  blendMode(BLEND);
+  //blendMode(BLEND);
   
   textFont(createFont("Consolas", FONT_SIZE));
   
@@ -41,7 +51,7 @@ void setup()
     life[x] = (int) random(10, 500);
   }
   
-  propertiesTimer = millis() + 1500;
+  propertiesTimer = millis() + 3000;
   
   fill(255);
   noFill();
@@ -50,18 +60,17 @@ void setup()
 
 void draw()
 {
-  
-  
-  
-  noStroke();
-  fill(0, 20);
-  rect(0, 0, width, height);
+  if (motionblur) {
+    noStroke();
+    fill(0, 20);
+    rect(0, 0, width, height);  
+  }
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     PVector position = pos[x];
     
     // Get noise direction
-    float angle = noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
+    float angle = noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*modes[mode]*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
     vel[x].x = cos(angle);//cos(angle);
     vel[x].y = sin(angle);//sin(angle);
     
@@ -99,7 +108,7 @@ void draw()
 void mousePressed()
 {
   seed = millis();
-  propertiesTimer = millis() + 1500;
+  propertiesTimer = millis() + 3000;
   noiseSeed(seed);  
   
 }
@@ -129,6 +138,14 @@ void keyPressed()
         if (spawnMode > 2) spawnMode = 0;
       } else if (options[selectedOption] == "multiplier") {
         multiplier += 0.1;
+      } else if (options[selectedOption] == "mode") {
+        if (mode + 1 == 5) { 
+          mode = 0;
+        } else {
+          mode++;
+        }
+      } else if (options[selectedOption] == "motionblur") {
+        motionblur = !motionblur;  
       }
       break;
     case LEFT:
@@ -139,11 +156,21 @@ void keyPressed()
         if (spawnMode < 0) spawnMode = 2;
       } else if (options[selectedOption] == "multiplier") {
         multiplier -= 0.1;
+      } else if (options[selectedOption] == "mode") {
+        if (mode - 1 == 0) {
+          mode = modes.length - 1;  
+        } else {
+          mode--;  
+        }
+      } else if (options[selectedOption] == "motionblur") {
+        motionblur = !motionblur;  
       }
       break;
   } 
+  
+  
+  propertiesTimer = millis() + 3000;
 }
-
 
 void DrawPropertiesWindows()
 {
@@ -153,21 +180,63 @@ void DrawPropertiesWindows()
   //fill(0);
   //rect(0, 0, 300, 150);
   fill(255);
-  text("Noise Properties", x, y); y += FONT_SIZE;
+  text("Noise Generator", x, y); y += FONT_SIZE;
   text("----------------", x, y); y += FONT_SIZE;
+  text("particle count = " + PARTICLE_COUNT, x, y); y += FONT_SIZE;
   text("seed = " + seed, x, y); y += FONT_SIZE; 
   
   for (int i = 0; i < options.length; i++) {
+    
+    if (i == selectedOption) {
+      fill(255, 0, 0);
+    } else {
+      fill(255);  
+    }
     switch(options[i]) 
     {
-      
+      case "scale":
+        text("scale = " + noiseScale, x, y); y += FONT_SIZE;
+        break;
+      case "spawn":
+        text("spawn type = " + spawnMode, x, y); y += FONT_SIZE;
+        break;
+      case "multiplier":
+        text("multiplier = " + multiplier, x, y); y+= FONT_SIZE;
+        break;
+      case "mode":
+        String type = "";
+        switch(mode) {
+          case 0: 
+            type = "PI";
+            break;
+          case 1: 
+            type = "TWO_PI";
+            break;
+          case 2: 
+            type = "HALF_PI";
+            break;
+          case 3:
+            type = "QUARTER_PI";
+            break;
+          case 4:
+            type = "TAU";
+            break;
+        }
+        text("mode = " + type, x, y); y += FONT_SIZE;
+        break;
+      case "motionblur":
+        text("motionblur = " + (motionblur ? "ON" : "OFF"), x, y); y += FONT_SIZE;
+        break;
     }
   }
   
-  text("scale = " + noiseScale, x, y); y += FONT_SIZE;
-  text("multiplier = " + multiplier, x, y); y+= FONT_SIZE;
-  text("spawn type = " + spawnMode, x, y); y += FONT_SIZE;
-  //text(nfc(frameRate) + " fps", x, y); y += FONT_SIZE; 
+  
+  fill(255); 
+  text(nfs(frameRate, 1, 2) + " fps", x, y); y += FONT_SIZE; 
+  
+  y += FONT_SIZE; text("Use UP and DOWN arrows to navigate", x, y); y += FONT_SIZE;
+  text("LEFT and RIGHT arrows decrease and increase selected value", x, y); y += FONT_SIZE;
+  text("CLICK mouse to change seed", x, y); y += FONT_SIZE;
 }
 
 PVector GetParticleSpawnPosition(int particleIndex)

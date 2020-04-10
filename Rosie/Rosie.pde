@@ -1,6 +1,6 @@
 import java.util.Iterator;
 
-final int PARTICLE_COUNT = 100; 
+final int PARTICLE_COUNT = 10000; 
 PVector[] pos_and_dir = new PVector[PARTICLE_COUNT]; 
 color[] colors = new color[PARTICLE_COUNT];
 int[] size = new int[PARTICLE_COUNT];

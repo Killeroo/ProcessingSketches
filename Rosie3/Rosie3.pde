@@ -92,7 +92,7 @@ void setup()
   
   // Setup up our particle properties
   for (int x = 0; x < PARTICLE_COUNT; x++) {
-    pos[x] = new PVector(width/2 + 100 + random(-50, 50), random(0, 1) > 0.5 ? random(0, (height /2) - 100) : random(height/2 + 100, height));
+    pos[x] = new PVector(random(0, width), random(0, height));
     start_pos[x] = pos[x];
     vel[x] = new PVector(random(-1.0, 1.0), random(-1.0, 1.0));
     life[x] = (int) random(250, 300);
@@ -115,7 +115,7 @@ void draw()
   
   for (int x = 0; x < PARTICLE_COUNT; x++) {
     PVector position = pos[x];
-    float angle = noise((position.x/300), (position.y/200)); //noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
+    float angle = noise((position.x/30), (position.y/20)); //noise(position.x/(noiseScale * 2.5), position.y/(noiseScale * 2.5))*HALF_PI*(noiseScale * 2.5);//4000//2500//noise(position.x/map(mouseY, 0, height, 1, 500), position.y/map(mouseX, 0, width, 1, 500)); //200 //50
     vel[x].x = cos(angle);
     vel[x].y = sin(angle);
     vel[x].mult(1.5);//2);
@@ -127,7 +127,7 @@ void draw()
       //map(vel[x].y, 0, 1, 0, 255),
       //map(pos[x].x, 0, 500, 0, 255), 
       //current_blue, 
-      life[x] < 255 ? life[x] : map(life[x], 400, 0, 0, 255));
+      20);//life[x] < 255 ? life[x] : map(life[x], 400, 0, 0, 255));
     
     ellipse(pos[x].x, pos[x].y, 2, 2);
   }

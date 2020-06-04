@@ -8,6 +8,10 @@ int gridHeight = 1;
 
 boolean running = true;
 
+// Cleanup
+// Make move function shorter
+// add some color based on number difference
+
 // TODO: variable start position
 // TODO: Variable number layouts
 // TODO: Variable knight move values (5 4)
